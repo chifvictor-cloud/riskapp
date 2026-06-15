@@ -1,0 +1,40 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+export async function submitMatchResult(
+  matchId: string,
+  claimedWinnerId: string,
+  screenshotUrl: string | null,
+) {
+  const supabase = await createClient()
+  const { data, error } = await (supabase as any).rpc('submit_match_result', {
+    p_match_id:       matchId,
+    p_claimed_winner: claimedWinnerId,
+    p_screenshot_url: screenshotUrl,
+  })
+
+  if (error) return { error: error.message as string }
+  if (data?.error) {
+    const messages: Record<string, string> = {
+      not_authenticated:  'Debes iniciar sesión',
+      match_not_found:    'Partida no encontrada',
+      match_not_active:   'Esta partida ya no está activa',
+      not_a_participant:  'No eres participante de esta partida',
+      invalid_winner:     'Ganador inválido',
+      already_reported:   'Ya reportaste el resultado de esta partida',
+    }
+    return { error: messages[data.error] ?? (data.error as string) }
+  }
+
+  revalidatePath(`/match/${matchId}`)
+  revalidatePath('/dashboard')
+  revalidatePath('/tournaments')
+
+  return {
+    success: true as const,
+    resultStatus: data?.result_status as 'pending_opponent' | 'completed' | 'disputed',
+    winnerId: data?.winner_id as string | null,
+  }
+}
