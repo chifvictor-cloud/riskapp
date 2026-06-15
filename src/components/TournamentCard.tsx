@@ -1,5 +1,5 @@
-﻿import Link from 'next/link'
-import { Users, DollarSign, Swords } from 'lucide-react'
+import Link from 'next/link'
+import { Users, DollarSign, Swords, Eye } from 'lucide-react'
 import type { Database } from '@/types/database'
 
 type Tournament = Database['public']['Tables']['tournaments']['Row']
@@ -21,18 +21,27 @@ export default function TournamentCard({ tournament }: { tournament: Tournament 
   const status = statusConfig[tournament.status]
   const spotsLeft = tournament.max_players - tournament.current_players
   const isFull = spotsLeft === 0
+  const isLive = tournament.status === 'in_progress' && (tournament as any).is_creator
 
   return (
     <Link href={`/tournaments/${tournament.id}`}>
-      <div className="bg-[#0f0e2a] border border-[#272454] rounded-xl p-5 hover:border-[#8b5cf6]/50 hover:shadow-[0_0_24px_rgba(139,92,246,0.12)] transition-all duration-200 group cursor-pointer h-full flex flex-col">
+      <div className={`bg-[#0f0e2a] border rounded-xl p-5 hover:border-[#8b5cf6]/50 hover:shadow-[0_0_24px_rgba(139,92,246,0.12)] transition-all duration-200 group cursor-pointer h-full flex flex-col ${
+        isLive ? 'border-red-400/30 shadow-[0_0_16px_rgba(248,113,113,0.05)]' : 'border-[#272454]'
+      }`}>
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full border ${status.bg} ${status.color}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${status.dot} ${tournament.status === 'open' ? 'animate-pulse' : ''}`} />
                 {status.label}
               </span>
+              {isLive && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-black text-red-400 bg-red-400/10 border border-red-400/20 px-2 py-0.5 rounded-full">
+                  <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+                  EN VIVO
+                </span>
+              )}
             </div>
             <h3 className="text-white font-bold text-base group-hover:text-[#8b5cf6] transition-colors line-clamp-2 leading-tight">
               {tournament.title}
@@ -83,6 +92,14 @@ export default function TournamentCard({ tournament }: { tournament: Tournament 
             <p className="text-[#555] text-xs mt-1.5">
               {isFull ? 'Torneo lleno' : `${spotsLeft} cupo${spotsLeft !== 1 ? 's' : ''} disponible`}
             </p>
+          </div>
+        )}
+
+        {/* Live: show "Ver en vivo" hint */}
+        {isLive && (
+          <div className="mt-4 flex items-center gap-1.5 text-red-400/70 text-xs">
+            <Eye size={11} />
+            <span>Toca para ver en vivo</span>
           </div>
         )}
       </div>

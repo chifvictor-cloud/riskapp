@@ -58,7 +58,16 @@ export default function TournamentList({ initialTournaments, format, fee, status
     const { data } = await query.limit(30)
     if (!data) return
 
-    const newList = data as Tournament[]
+    // Sort: live (in_progress + is_creator) first, then in_progress, then open
+    const newList = [...data as Tournament[]].sort((a, b) => {
+      const rank = (t: Tournament) => {
+        if (t.status === 'in_progress' && (t as any).is_creator) return 0
+        if (t.status === 'in_progress') return 1
+        if (t.status === 'open') return 2
+        return 3
+      }
+      return rank(a) - rank(b)
+    })
 
     if (!isFirstRender.current) {
       const added = newList.filter(t => !knownIds.current.has(t.id)).map(t => t.id)

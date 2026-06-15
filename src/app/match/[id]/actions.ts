@@ -38,3 +38,51 @@ export async function submitMatchResult(
     winnerId: data?.winner_id as string | null,
   }
 }
+
+export async function spectateVote(matchId: string, votedFor: string) {
+  const supabase = await createClient()
+  const { error } = await (supabase as any).rpc('vote_for_player', {
+    p_match_id: matchId,
+    p_voted_for: votedFor,
+  })
+  if (error) return { error: error.message as string }
+  return { success: true as const }
+}
+
+export async function sponsorPlayer(tournamentId: string, playerId: string) {
+  const supabase = await createClient()
+  const { error } = await (supabase as any).rpc('sponsor_player', {
+    p_tournament_id: tournamentId,
+    p_player_id: playerId,
+  })
+  if (error) {
+    const messages: Record<string, string> = {
+      tournament_not_found: 'Torneo no encontrado',
+      tournament_not_open:  'El torneo ya no está abierto',
+      cannot_sponsor_own:   'No puedes patrocinar tu propio torneo',
+      already_sponsored:    'Este jugador ya tiene un patrocinador',
+      insufficient_balance: 'Balance insuficiente para patrocinar',
+    }
+    return { error: messages[error.message] ?? error.message }
+  }
+  revalidatePath(`/tournaments/${tournamentId}`)
+  return { success: true as const }
+}
+
+export async function redeemProduct(productId: string) {
+  const supabase = await createClient()
+  const { error } = await (supabase as any).rpc('redeem_product', {
+    p_product_id: productId,
+  })
+  if (error) {
+    const messages: Record<string, string> = {
+      product_not_found:   'Producto no encontrado',
+      out_of_stock:        'Producto sin stock',
+      insufficient_points: 'No tienes suficientes puntos',
+    }
+    return { error: messages[error.message] ?? error.message }
+  }
+  revalidatePath('/store')
+  revalidatePath('/profile')
+  return { success: true as const }
+}

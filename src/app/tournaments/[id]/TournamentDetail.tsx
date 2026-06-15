@@ -4,7 +4,9 @@ import { useState, useEffect, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { joinTournament, reportMatchResult } from './actions'
-import { Users, Trophy, AlertCircle, Clock, Swords, Crown, Gamepad2, X } from 'lucide-react'
+import { sponsorPlayer } from '@/app/match/[id]/actions'
+import { Users, Trophy, AlertCircle, Clock, Swords, Crown, Gamepad2, X, Eye, Star } from 'lucide-react'
+import Link from 'next/link'
 import type { Database } from '@/types/database'
 
 type Tournament = Database['public']['Tables']['tournaments']['Row']
@@ -13,12 +15,15 @@ type Match = Database['public']['Tables']['matches']['Row']
 interface Profile { username: string; display_name: string | null; wins: number; losses: number; points: number }
 interface Participant { id: string; tournament_id: string; player_id: string; status: string; joined_at: string; epic_username: string | null; profiles: Profile | null }
 
+interface SponsorRecord { player_id: string; sponsor_id: string; amount: number; profiles: { username: string; display_name: string | null } | null }
+
 interface Props {
   tournament: Tournament
   participants: Participant[]
   match: Match | null
   userId: string | null
   userEpicUsername: string | null
+  sponsors?: SponsorRecord[]
 }
 
 // ── Match Found Overlay ──────────────────────────────────────────────────────
@@ -96,7 +101,7 @@ function MatchFoundOverlay({
 }
 
 // ── Player Slot ──────────────────────────────────────────────────────────────
-function PlayerSlot({ participant, isWinner, isMe }: { participant: Participant | null; isWinner?: boolean; isMe?: boolean }) {
+function PlayerSlot({ participant, isWinner, isMe, sponsor }: { participant: Participant | null; isWinner?: boolean; isMe?: boolean; sponsor?: SponsorRecord | null }) {
   if (!participant) {
     return (
       <div className="flex-1 bg-[#0f0e2a] border-2 border-dashed border-[#272454] rounded-xl p-5 flex flex-col items-center justify-center min-h-[130px] gap-2">
@@ -137,6 +142,11 @@ function PlayerSlot({ participant, isWinner, isMe }: { participant: Participant 
         <p className="text-[#8b5cf6] text-xs mt-0.5 font-mono">{participant.epic_username}</p>
       )}
       {isMe && <span className="text-[#555] text-xs mt-0.5">Tú</span>}
+      {sponsor && (
+        <span className="mt-1.5 inline-flex items-center gap-1 text-[9px] font-black text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-1.5 py-0.5 rounded-full">
+          <Star size={7} />PATROCINADO
+        </span>
+      )}
       <div className="flex gap-3 mt-3 text-center">
         <div><p className="text-white font-bold text-xs">{profile?.wins ?? 0}</p><p className="text-[#555] text-[10px]">W</p></div>
         <div><p className="text-[#8b5cf6] font-bold text-xs">{winRate}%</p><p className="text-[#555] text-[10px]">WR</p></div>
@@ -147,12 +157,14 @@ function PlayerSlot({ participant, isWinner, isMe }: { participant: Participant 
 }
 
 // ── Main Component ────────────────────────────────────────────────────────────
-export default function TournamentDetail({ tournament: init, participants: initP, match: initM, userId, userEpicUsername }: Props) {
+export default function TournamentDetail({ tournament: init, participants: initP, match: initM, userId, userEpicUsername, sponsors: initSponsors = [] }: Props) {
   const [tournament, setTournament] = useState(init)
   const [participants, setParticipants] = useState(initP)
   const [match, setMatch] = useState(initM)
+  const [sponsors, setSponsors] = useState(initSponsors)
   const [error, setError] = useState<string | null>(null)
   const [reportingResult, setReportingResult] = useState(false)
+  const [sponsoring, setSponsoring] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   // Join flow state
@@ -330,11 +342,21 @@ export default function TournamentDetail({ tournament: init, participants: initP
             <Swords size={15} className="text-[#8b5cf6]" /> Jugadores
           </h2>
           <div className="flex items-stretch gap-3">
-            <PlayerSlot participant={player1} isWinner={!!match?.winner_id && match.winner_id === player1?.player_id} isMe={player1?.player_id === userId} />
+            <PlayerSlot
+              participant={player1}
+              isWinner={!!match?.winner_id && match.winner_id === player1?.player_id}
+              isMe={player1?.player_id === userId}
+              sponsor={sponsors.find(s => s.player_id === player1?.player_id)}
+            />
             <div className="flex items-center justify-center px-1">
               <span className="text-[#2d2960] font-black text-sm">VS</span>
             </div>
-            <PlayerSlot participant={player2} isWinner={!!match?.winner_id && match.winner_id === player2?.player_id} isMe={player2?.player_id === userId} />
+            <PlayerSlot
+              participant={player2}
+              isWinner={!!match?.winner_id && match.winner_id === player2?.player_id}
+              isMe={player2?.player_id === userId}
+              sponsor={sponsors.find(s => s.player_id === player2?.player_id)}
+            />
           </div>
         </div>
 
@@ -385,6 +407,35 @@ export default function TournamentDetail({ tournament: init, participants: initP
                   </div>
                 )}
               </>
+            )}
+
+            {/* SPONSOR BUTTON — shown to non-participants when player1 exists but no player2 yet */}
+            {tournament.status === 'open' && !isInTournament && player1 && !player2 && userId && player1.player_id !== userId && !sponsors.find(s => s.player_id === player1.player_id) && (
+              <div className="bg-[#08071a] border border-yellow-400/20 rounded-2xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Star size={14} className="text-yellow-400" />
+                  <p className="text-white font-bold text-sm">Patrocinar a este jugador</p>
+                </div>
+                <p className="text-[#888] text-xs mb-3">
+                  Paga la entrada (${tournament.entry_fee} MXN) por él. Si gana: 60% para el jugador, 40% para ti.
+                </p>
+                <button
+                  onClick={() => {
+                    setSponsoring(true)
+                    startTransition(async () => {
+                      const result = await sponsorPlayer(tournament.id, player1.player_id)
+                      setSponsoring(false)
+                      if ('error' in result) {
+                        setError(result.error ?? 'Error al patrocinar')
+                      }
+                    })
+                  }}
+                  disabled={sponsoring || isPending}
+                  className="w-full bg-yellow-400/10 hover:bg-yellow-400/20 border border-yellow-400/30 text-yellow-400 font-bold py-2.5 rounded-xl transition-all text-sm disabled:opacity-50"
+                >
+                  {sponsoring ? 'Procesando...' : `Patrocinar · $${tournament.entry_fee} MXN`}
+                </button>
+              </div>
             )}
 
             {/* WAITING */}
@@ -458,6 +509,20 @@ export default function TournamentDetail({ tournament: init, participants: initP
               Inicia sesión para unirte
             </a>
           )
+        )}
+
+        {/* Ver en vivo link for active matches */}
+        {match && match.status === 'in_progress' && (
+          <Link
+            href={`/match/${match.id}/spectate`}
+            className="flex items-center justify-center gap-2 w-full bg-[#8b5cf6]/8 hover:bg-[#8b5cf6]/15 border border-[#8b5cf6]/25 text-[#8b5cf6] font-semibold py-3 rounded-xl transition-all text-sm"
+          >
+            <Eye size={14} />
+            Ver en vivo como espectador
+            {(match as any).spectator_count > 0 && (
+              <span className="text-[#8b5cf6]/60 text-xs">· {(match as any).spectator_count} viendo</span>
+            )}
+          </Link>
         )}
 
         {/* Completed result */}

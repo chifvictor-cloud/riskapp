@@ -14,6 +14,8 @@ export type Database = {
           losses: number
           points: number
           is_admin: boolean
+          is_vip: boolean
+          vip_expires_at: string | null
           created_at: string
           updated_at: string
         }
@@ -28,6 +30,8 @@ export type Database = {
           wins?: number
           losses?: number
           points?: number
+          is_vip?: boolean
+          vip_expires_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -41,6 +45,8 @@ export type Database = {
           wins?: number
           losses?: number
           points?: number
+          is_vip?: boolean
+          vip_expires_at?: string | null
           updated_at?: string
         }
       }
@@ -60,6 +66,10 @@ export type Database = {
           winner_id: string | null
           starts_at: string | null
           ends_at: string | null
+          is_creator: boolean
+          stream_url: string | null
+          chat_pot_enabled: boolean
+          chat_pot_amount: number
           created_at: string
           updated_at: string
         }
@@ -78,6 +88,10 @@ export type Database = {
           winner_id?: string | null
           starts_at?: string | null
           ends_at?: string | null
+          is_creator?: boolean
+          stream_url?: string | null
+          chat_pot_enabled?: boolean
+          chat_pot_amount?: number
           created_at?: string
           updated_at?: string
         }
@@ -94,6 +108,10 @@ export type Database = {
           winner_id?: string | null
           starts_at?: string | null
           ends_at?: string | null
+          is_creator?: boolean
+          stream_url?: string | null
+          chat_pot_enabled?: boolean
+          chat_pot_amount?: number
           updated_at?: string
         }
       }
@@ -138,6 +156,8 @@ export type Database = {
           admin_note: string | null
           resolved_by: string | null
           resolved_at: string | null
+          spectator_count: number
+          sponsor_id: string | null
         }
         Insert: {
           id?: string
@@ -157,6 +177,8 @@ export type Database = {
           admin_note?: string | null
           resolved_by?: string | null
           resolved_at?: string | null
+          spectator_count?: number
+          sponsor_id?: string | null
         }
         Update: {
           winner_id?: string | null
@@ -171,6 +193,8 @@ export type Database = {
           admin_note?: string | null
           resolved_by?: string | null
           resolved_at?: string | null
+          spectator_count?: number
+          sponsor_id?: string | null
         }
       }
       transactions: {
@@ -196,6 +220,130 @@ export type Database = {
         }
         Update: {
           status?: 'pending' | 'completed' | 'failed' | 'cancelled'
+        }
+      }
+      spectator_sessions: {
+        Row: {
+          id: string
+          match_id: string
+          user_id: string
+          voted_for: string | null
+          joined_at: string
+          left_at: string | null
+          points_earned: number
+        }
+        Insert: {
+          id?: string
+          match_id: string
+          user_id: string
+          voted_for?: string | null
+          joined_at?: string
+          left_at?: string | null
+          points_earned?: number
+        }
+        Update: {
+          voted_for?: string | null
+          left_at?: string | null
+          points_earned?: number
+        }
+      }
+      spectator_chat_messages: {
+        Row: {
+          id: string
+          match_id: string
+          user_id: string
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          match_id: string
+          user_id: string
+          content: string
+          created_at?: string
+        }
+        Update: {
+          content?: string
+        }
+      }
+      sponsors: {
+        Row: {
+          id: string
+          tournament_id: string
+          player_id: string
+          sponsor_id: string
+          amount: number
+          status: 'active' | 'won' | 'lost'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tournament_id: string
+          player_id: string
+          sponsor_id: string
+          amount: number
+          status?: 'active' | 'won' | 'lost'
+          created_at?: string
+        }
+        Update: {
+          status?: 'active' | 'won' | 'lost'
+        }
+      }
+      store_products: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          category: 'fortnite' | 'tarjetas' | 'merch'
+          points_cost: number
+          image_url: string | null
+          stock: number | null
+          is_active: boolean
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          category: 'fortnite' | 'tarjetas' | 'merch'
+          points_cost: number
+          image_url?: string | null
+          stock?: number | null
+          is_active?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          name?: string
+          description?: string | null
+          category?: 'fortnite' | 'tarjetas' | 'merch'
+          points_cost?: number
+          image_url?: string | null
+          stock?: number | null
+          is_active?: boolean
+          sort_order?: number
+        }
+      }
+      store_redemptions: {
+        Row: {
+          id: string
+          user_id: string
+          product_id: string
+          points_spent: number
+          status: 'pending' | 'fulfilled' | 'cancelled'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          product_id: string
+          points_spent: number
+          status?: 'pending' | 'fulfilled' | 'cancelled'
+          created_at?: string
+        }
+        Update: {
+          status?: 'pending' | 'fulfilled' | 'cancelled'
         }
       }
     }

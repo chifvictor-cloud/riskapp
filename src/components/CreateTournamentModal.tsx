@@ -1,9 +1,9 @@
-﻿'use client'
+'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createTournament } from '@/app/tournaments/[id]/actions'
-import { X, Trophy, Hammer, Zap, AlertCircle, ChevronRight } from 'lucide-react'
+import { X, Trophy, Hammer, Zap, AlertCircle, ChevronRight, Tv2, ChevronDown } from 'lucide-react'
 
 const FORMATS = [
   { value: 'No Build', label: 'No Build', desc: 'Sin construcciones. Puro aim.', icon: <Trophy size={22} className="text-[#8b5cf6]" /> },
@@ -23,6 +23,9 @@ export default function CreateTournamentModal({ onClose, defaultEpicUsername }: 
   const [format, setFormat] = useState('')
   const [entryFee, setEntryFee] = useState<number | null>(null)
   const [epicUsername, setEpicUsername] = useState(defaultEpicUsername ?? '')
+  const [isCreator, setIsCreator] = useState(false)
+  const [streamUrl, setStreamUrl] = useState('')
+  const [chatPotEnabled, setChatPotEnabled] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -33,7 +36,12 @@ export default function CreateTournamentModal({ onClose, defaultEpicUsername }: 
     if (!format || !entryFee || !epicUsername.trim()) return
     setError(null)
     startTransition(async () => {
-      const result = await createTournament(entryFee, format, epicUsername.trim())
+      const result = await createTournament(
+        entryFee,
+        format,
+        epicUsername.trim(),
+        isCreator ? { isCreator: true, streamUrl, chatPotEnabled } : undefined,
+      )
       if ('error' in result) {
         setError(result.error ?? 'Error al crear el torneo')
       } else {
@@ -128,7 +136,7 @@ export default function CreateTournamentModal({ onClose, defaultEpicUsername }: 
             </>
           )}
 
-          {/* Step 3: Epic username + summary */}
+          {/* Step 3: Epic username + creator options + summary */}
           {step === 3 && (
             <div className="mt-1">
               <input
@@ -141,10 +149,61 @@ export default function CreateTournamentModal({ onClose, defaultEpicUsername }: 
                 className="w-full bg-[#0f0e2a] border border-[#272454] focus:border-[#8b5cf6] rounded-xl px-4 py-3 text-white placeholder-[#444] outline-none transition-colors mb-4 font-mono"
               />
 
+              {/* Creator toggle */}
+              <div className="mb-4 bg-[#08071a] border border-[#1e1b4b] rounded-xl overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setIsCreator(v => !v)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                >
+                  <div className={`w-9 h-5 rounded-full transition-colors flex-shrink-0 relative ${isCreator ? 'bg-[#8b5cf6]' : 'bg-[#272454]'}`}>
+                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${isCreator ? 'left-4' : 'left-0.5'}`} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <Tv2 size={13} className={isCreator ? 'text-[#8b5cf6]' : 'text-[#555]'} />
+                      <span className={`text-sm font-semibold ${isCreator ? 'text-white' : 'text-[#888]'}`}>¿Eres creador de contenido?</span>
+                    </div>
+                    <p className="text-[#555] text-xs mt-0.5">Activa el modo streamer con chat en vivo y pozo</p>
+                  </div>
+                  <ChevronDown size={14} className={`text-[#555] transition-transform ${isCreator ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isCreator && (
+                  <div className="px-4 pb-4 space-y-3 border-t border-[#1e1b4b]">
+                    <div className="pt-3">
+                      <label className="text-[#888] text-xs mb-1.5 block">Link de Twitch o TikTok Live</label>
+                      <input
+                        type="url"
+                        value={streamUrl}
+                        onChange={e => setStreamUrl(e.target.value)}
+                        placeholder="https://twitch.tv/tucanal"
+                        className="w-full bg-[#0f0e2a] border border-[#272454] focus:border-[#8b5cf6] rounded-lg px-3 py-2 text-white placeholder-[#444] outline-none transition-colors text-sm"
+                      />
+                    </div>
+                    <label className="flex items-center gap-2.5 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={chatPotEnabled}
+                        onChange={e => setChatPotEnabled(e.target.checked)}
+                        className="w-4 h-4 accent-[#8b5cf6]"
+                      />
+                      <div>
+                        <p className="text-white text-xs font-semibold">Activar pozo del chat</p>
+                        <p className="text-[#555] text-[10px]">10% del rake va al pozo — se sortea entre espectadores que acertaron</p>
+                      </div>
+                    </label>
+                  </div>
+                )}
+              </div>
+
               {/* Summary */}
               <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-xl p-4 mb-4 space-y-2 text-sm">
                 <div className="flex justify-between"><span className="text-[#888]">Formato</span><span className="text-white font-semibold">{format}</span></div>
                 <div className="flex justify-between"><span className="text-[#888]">Tu entrada</span><span className="text-white font-semibold">${entryFee} MXN</span></div>
+                {isCreator && (
+                  <div className="flex justify-between"><span className="text-[#888]">Modo</span><span className="text-[#8b5cf6] font-semibold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />EN VIVO</span></div>
+                )}
                 <div className="flex justify-between border-t border-[#1e1b4b] pt-2">
                   <span className="text-[#888]">Premio si ganas</span>
                   <span className="text-[#8b5cf6] font-black">${prizePool} MXN</span>

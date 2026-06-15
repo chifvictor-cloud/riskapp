@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import Navbar from '@/components/Navbar'
 import TournamentDetail from './TournamentDetail'
 import Link from 'next/link'
-import { ChevronLeft, DollarSign, Swords, Calendar } from 'lucide-react'
+import { ChevronLeft, DollarSign, Swords, Calendar, Eye } from 'lucide-react'
 import type { Database } from '@/types/database'
 
 type Tournament = Database['public']['Tables']['tournaments']['Row']
@@ -34,7 +34,16 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
 
   if (!tournament) notFound()
 
-  // Get user's saved epic username for pre-fill
+  // Fetch sponsor data for this tournament
+  const { data: sponsorRaw } = await (supabase as any)
+    .from('sponsors')
+    .select('player_id, sponsor_id, amount, status, profiles!sponsors_sponsor_id_fkey(username, display_name)')
+    .eq('tournament_id', id)
+    .eq('status', 'active')
+    .limit(2)
+
+  const sponsors = (sponsorRaw ?? []) as any[]
+
   let userEpicUsername: string | null = null
   if (user) {
     const { data: profile } = await supabase
@@ -43,7 +52,6 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
       .eq('id', user.id)
       .single()
     userEpicUsername = (profile as any)?.fortnite_username ?? null
-    // Also check if participant has one stored
     const myParticipant = participants.find((p: any) => p.player_id === user.id)
     if (myParticipant?.epic_username) userEpicUsername = myParticipant.epic_username
   }
@@ -65,7 +73,15 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
           {/* Left: static info */}
           <div className="lg:col-span-1 space-y-4">
             <div className="bg-[#0f0e2a] border border-[#201e50] rounded-2xl p-5">
-              <h1 className="text-white font-black text-xl mb-4 leading-tight">{tournament.title}</h1>
+              <div className="flex items-start justify-between gap-2 mb-4">
+                <h1 className="text-white font-black text-xl leading-tight">{tournament.title}</h1>
+                {tournament.is_creator && (
+                  <span className="flex-shrink-0 inline-flex items-center gap-1 text-[10px] font-black text-red-400 bg-red-400/10 border border-red-400/20 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+                    EN VIVO
+                  </span>
+                )}
+              </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[#888] text-sm"><Swords size={13} />Formato</div>
@@ -83,8 +99,28 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
                   <div className="flex items-center gap-2 text-[#888] text-sm"><Calendar size={13} />Creado</div>
                   <span className="text-white text-xs">{createdAt}</span>
                 </div>
+                {match && match.spectator_count > 0 && (
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[#888] text-sm"><Eye size={13} />Espectadores</div>
+                    <span className="text-[#8b5cf6] font-bold text-sm">{match.spectator_count}</span>
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Ver en vivo button */}
+            {match && match.status === 'in_progress' && (
+              <Link
+                href={`/match/${match.id}/spectate`}
+                className="flex items-center justify-center gap-2 w-full bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 border border-[#8b5cf6]/30 text-[#8b5cf6] font-bold py-3 rounded-xl transition-all text-sm"
+              >
+                <Eye size={15} />
+                Ver en vivo
+                {match.spectator_count > 0 && (
+                  <span className="text-[#8b5cf6]/60 text-xs">({match.spectator_count})</span>
+                )}
+              </Link>
+            )}
 
             {tournament.rules && (
               <div className="bg-[#0f0e2a] border border-[#201e50] rounded-2xl p-5">
@@ -102,6 +138,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
               match={match}
               userId={user?.id ?? null}
               userEpicUsername={userEpicUsername}
+              sponsors={sponsors}
             />
           </div>
         </div>

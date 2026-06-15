@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Trophy, Wallet, LogOut, Menu, X } from 'lucide-react'
+import { Trophy, Wallet, LogOut, Menu, X, ShoppingBag } from 'lucide-react'
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
@@ -63,9 +63,15 @@ export default function Navbar() {
               Ranking
             </Link>
             {user && (
-              <Link href="/dashboard" className="text-[#888] hover:text-white transition-colors text-sm font-medium">
-                Dashboard
-              </Link>
+              <>
+                <Link href="/dashboard" className="text-[#888] hover:text-white transition-colors text-sm font-medium">
+                  Dashboard
+                </Link>
+                <Link href="/store" className="flex items-center gap-1.5 text-[#888] hover:text-white transition-colors text-sm font-medium">
+                  <ShoppingBag size={13} />
+                  Tienda
+                </Link>
+              </>
             )}
           </div>
 
@@ -127,6 +133,7 @@ export default function Navbar() {
           {user ? (
             <>
               <Link href="/dashboard" className="block text-[#888] hover:text-white py-2">Dashboard</Link>
+              <Link href="/store" className="block text-[#888] hover:text-white py-2">Tienda</Link>
               <Link href="/profile" className="block text-[#888] hover:text-white py-2">Perfil</Link>
               <button onClick={handleSignOut} className="block text-red-400 py-2 w-full text-left">
                 Cerrar sesión

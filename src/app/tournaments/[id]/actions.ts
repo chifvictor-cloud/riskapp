@@ -49,7 +49,16 @@ export async function reportMatchResult(matchId: string, winnerId: string) {
   return { success: true as const, prize: data?.prize as number }
 }
 
-export async function createTournament(entryFee: number, gameMode: string, epicUsername: string) {
+export async function createTournament(
+  entryFee: number,
+  gameMode: string,
+  epicUsername: string,
+  creatorOptions?: {
+    isCreator: boolean
+    streamUrl?: string
+    chatPotEnabled?: boolean
+  },
+) {
   const supabase = await createClient()
   const { data, error } = await (supabase as any).rpc('create_tournament', {
     p_entry_fee: entryFee,
@@ -68,7 +77,18 @@ export async function createTournament(entryFee: number, gameMode: string, epicU
     return { error: messages[data.error] ?? (data.error as string) }
   }
 
+  const tournamentId = data?.tournament_id as string
+
+  // Post-creation: apply creator options if provided
+  if (creatorOptions?.isCreator && tournamentId) {
+    await supabase.from('tournaments').update({
+      is_creator: true,
+      stream_url: creatorOptions.streamUrl?.trim() || null,
+      chat_pot_enabled: creatorOptions.chatPotEnabled ?? false,
+    }).eq('id', tournamentId)
+  }
+
   revalidatePath('/tournaments')
   revalidatePath('/dashboard')
-  return { success: true as const, tournamentId: data?.tournament_id as string }
+  return { success: true as const, tournamentId }
 }
