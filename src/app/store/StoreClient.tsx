@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { redeemProduct } from '@/app/match/[id]/actions'
+import { redeemProduct } from './actions'
 import { Crown, Star, Zap, ShoppingBag, Package, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 
 interface Product {
@@ -299,7 +299,7 @@ export default function StoreClient({ userPoints, isVip, products, initialRedemp
             <ShoppingBag size={14} className="text-[#8b5cf6]" />
             Mis canjes recientes
           </h2>
-          <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl overflow-hidden divide-y divide-[#111]">
+          <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl overflow-hidden divide-y divide-[#0f0e2a]">
             {redemptions.map(r => (
               <div key={r.id} className="flex items-center gap-4 px-5 py-3">
                 <div className="text-lg flex-shrink-0">{CATEGORY_ICONS[r.store_products?.category ?? 'fortnite']}</div>
