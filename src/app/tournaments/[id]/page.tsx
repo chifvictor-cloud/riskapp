@@ -53,7 +53,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
   })
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#0a0a0f]">
       <Navbar />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <Link href="/tournaments" className="inline-flex items-center gap-1.5 text-[#888] hover:text-white text-sm transition-colors mb-6">
@@ -77,7 +77,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
                 </div>
                 <div className="flex items-center justify-between border-t border-[#1a1a1a] pt-3">
                   <div className="flex items-center gap-2 text-[#888] text-sm"><DollarSign size={13} />Premio</div>
-                  <span className="text-[#e85d24] font-black">${tournament.prize_pool} MXN</span>
+                  <span className="text-[#7c3aed] font-black">${tournament.prize_pool} MXN</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[#888] text-sm"><Calendar size={13} />Creado</div>

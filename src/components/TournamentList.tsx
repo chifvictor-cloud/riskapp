@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
@@ -105,7 +105,7 @@ export default function TournamentList({ initialTournaments, format, fee, status
         {userId && (
           <button
             onClick={() => setShowModal(true)}
-            className="inline-flex items-center gap-2 bg-[#e85d24] hover:bg-[#d14d18] text-white font-bold px-4 py-2 rounded-xl transition-colors text-sm shadow-[0_0_16px_rgba(232,93,36,0.2)]"
+            className="inline-flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold px-4 py-2 rounded-xl transition-colors text-sm shadow-[0_0_16px_rgba(124,58,237,0.2)]"
           >
             <Plus size={15} />
             Crear torneo
@@ -119,7 +119,7 @@ export default function TournamentList({ initialTournaments, format, fee, status
           {tournaments.map(t => (
             <div
               key={t.id}
-              className={`transition-all duration-500 ${newIds.has(t.id) ? 'scale-[1.02] ring-2 ring-[#e85d24]/40 rounded-xl' : ''}`}
+              className={`transition-all duration-500 ${newIds.has(t.id) ? 'scale-[1.02] ring-2 ring-[#7c3aed]/40 rounded-xl' : ''}`}
             >
               <TournamentCard tournament={t} />
             </div>
@@ -135,14 +135,14 @@ export default function TournamentList({ initialTournaments, format, fee, status
           {userId && (
             <button
               onClick={() => setShowModal(true)}
-              className="inline-flex items-center gap-2 bg-[#e85d24] hover:bg-[#d14d18] text-white font-bold px-6 py-3 rounded-xl transition-colors"
+              className="inline-flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold px-6 py-3 rounded-xl transition-colors"
             >
               <Plus size={16} />
               Crear torneo
             </button>
           )}
           {!userId && (
-            <a href="/auth/login" className="inline-block bg-[#e85d24] hover:bg-[#d14d18] text-white font-bold px-6 py-3 rounded-xl transition-colors">
+            <a href="/auth/login" className="inline-block bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold px-6 py-3 rounded-xl transition-colors">
               Iniciar sesión para crear
             </a>
           )}

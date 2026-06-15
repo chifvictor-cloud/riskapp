@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -42,15 +42,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
       {/* Background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#e85d24]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#7c3aed]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-[#e85d24] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#7c3aed] rounded-lg flex items-center justify-center">
               <span className="text-white font-black text-lg">R</span>
             </div>
             <span className="text-white font-black text-2xl tracking-wider">RISK</span>
@@ -99,7 +99,7 @@ export default function LoginPage() {
                   onChange={e => setEmail(e.target.value)}
                   required
                   placeholder="tu@email.com"
-                  className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#e85d24] transition-colors"
+                  className="w-full bg-[#0a0a0f] border border-[#222] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#7c3aed] transition-colors"
                 />
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function LoginPage() {
                   onChange={e => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full bg-[#0a0a0a] border border-[#222] rounded-lg pl-10 pr-12 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#e85d24] transition-colors"
+                  className="w-full bg-[#0a0a0f] border border-[#222] rounded-lg pl-10 pr-12 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#7c3aed] transition-colors"
                 />
                 <button
                   type="button"
@@ -127,7 +127,7 @@ export default function LoginPage() {
             </div>
 
             <div className="flex justify-end">
-              <Link href="/auth/reset-password" className="text-[#e85d24] text-sm hover:underline">
+              <Link href="/auth/reset-password" className="text-[#7c3aed] text-sm hover:underline">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
@@ -135,7 +135,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#e85d24] hover:bg-[#d14d18] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors"
+              className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors"
             >
               {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </button>
@@ -144,7 +144,7 @@ export default function LoginPage() {
 
         <p className="text-center text-[#888] mt-6">
           ¿No tienes cuenta?{' '}
-          <Link href="/auth/register" className="text-[#e85d24] font-semibold hover:underline">
+          <Link href="/auth/register" className="text-[#7c3aed] font-semibold hover:underline">
             Regístrate gratis
           </Link>
         </p>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -165,7 +165,7 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
                     </span>
                   </div>
                   {epic && (
-                    <p className="text-[#e85d24] text-xs font-mono">{epic}</p>
+                    <p className="text-[#7c3aed] text-xs font-mono">{epic}</p>
                   )}
                 </div>
                 {/* Screenshot */}
@@ -204,7 +204,7 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
             value={note}
             onChange={e => setNote(e.target.value)}
             placeholder="Nota para ambos jugadores (opcional)"
-            className="w-full bg-[#111] border border-[#222] focus:border-[#e85d24] rounded-xl px-4 py-2.5 text-white placeholder-[#444] outline-none text-sm transition-colors"
+            className="w-full bg-[#111] border border-[#222] focus:border-[#7c3aed] rounded-xl px-4 py-2.5 text-white placeholder-[#444] outline-none text-sm transition-colors"
           />
 
           {/* Resolve */}
@@ -214,7 +214,7 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
               <button
                 onClick={() => resolve(match.player1_id)}
                 disabled={isPending}
-                className="flex items-center justify-center gap-2 bg-[#e85d24]/10 hover:bg-[#e85d24]/18 disabled:opacity-40 border border-[#e85d24]/35 text-[#e85d24] font-bold py-3.5 rounded-xl transition-all text-sm"
+                className="flex items-center justify-center gap-2 bg-[#7c3aed]/10 hover:bg-[#7c3aed]/18 disabled:opacity-40 border border-[#7c3aed]/35 text-[#7c3aed] font-bold py-3.5 rounded-xl transition-all text-sm"
               >
                 <Crown size={14} />
                 {isPending ? 'Procesando…' : `${p1Name} ganó`}
@@ -222,7 +222,7 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
               <button
                 onClick={() => resolve(match.player2_id)}
                 disabled={isPending}
-                className="flex items-center justify-center gap-2 bg-[#e85d24]/10 hover:bg-[#e85d24]/18 disabled:opacity-40 border border-[#e85d24]/35 text-[#e85d24] font-bold py-3.5 rounded-xl transition-all text-sm"
+                className="flex items-center justify-center gap-2 bg-[#7c3aed]/10 hover:bg-[#7c3aed]/18 disabled:opacity-40 border border-[#7c3aed]/35 text-[#7c3aed] font-bold py-3.5 rounded-xl transition-all text-sm"
               >
                 <Crown size={14} />
                 {isPending ? 'Procesando…' : `${p2Name} ganó`}
@@ -340,7 +340,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
               onClick={() => setTab(t.id)}
               className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                 tab === t.id
-                  ? 'bg-[#e85d24] text-white shadow-[0_0_16px_rgba(232,93,36,0.25)]'
+                  ? 'bg-[#7c3aed] text-white shadow-[0_0_16px_rgba(124,58,237,0.25)]'
                   : 'text-[#666] hover:text-white'
               }`}
             >
@@ -370,33 +370,33 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                 label: 'Torneos hoy',
                 value: stats.tournamentsToday,
                 sub: 'creados este día',
-                icon: <Swords size={17} className="text-[#e85d24]" />,
+                icon: <Swords size={17} className="text-[#7c3aed]" />,
               },
               {
                 label: 'Ingresos hoy',
                 value: `$${stats.revenueToday.toFixed(0)}`,
                 sub: 'MXN (10% del prize pool)',
-                icon: <TrendingUp size={17} className="text-[#e85d24]" />,
+                icon: <TrendingUp size={17} className="text-[#7c3aed]" />,
                 accent: true,
               },
               {
                 label: 'Disputas activas',
                 value: stats.disputesCount,
                 sub: disputes.length === 0 ? 'Sin conflictos' : 'requieren revisión',
-                icon: <ShieldAlert size={17} className={stats.disputesCount > 0 ? 'text-yellow-400' : 'text-[#e85d24]'} />,
+                icon: <ShieldAlert size={17} className={stats.disputesCount > 0 ? 'text-yellow-400' : 'text-[#7c3aed]'} />,
                 warn: stats.disputesCount > 0,
               },
               {
                 label: 'Usuarios registrados',
                 value: stats.totalUsers,
                 sub: 'en la plataforma',
-                icon: <Users size={17} className="text-[#e85d24]" />,
+                icon: <Users size={17} className="text-[#7c3aed]" />,
               },
             ].map((s, i) => (
               <div
                 key={i}
                 className={`bg-[#0e0e0e] border rounded-2xl p-5 ${
-                  s.accent ? 'border-[#e85d24]/25' :
+                  s.accent ? 'border-[#7c3aed]/25' :
                   s.warn ? 'border-yellow-400/25' :
                   'border-[#1a1a1a]'
                 }`}
@@ -404,13 +404,13 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-[#555] text-xs font-medium">{s.label}</span>
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                    s.warn ? 'bg-yellow-400/10' : 'bg-[#e85d24]/10'
+                    s.warn ? 'bg-yellow-400/10' : 'bg-[#7c3aed]/10'
                   }`}>
                     {s.icon}
                   </div>
                 </div>
                 <div className={`font-black text-2xl leading-none mb-1 ${
-                  s.accent ? 'text-[#e85d24]' :
+                  s.accent ? 'text-[#7c3aed]' :
                   s.warn ? 'text-yellow-400' :
                   'text-white'
                 }`}>{s.value}</div>
@@ -448,7 +448,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                     </button>
                   ))}
                   {disputes.length > 3 && (
-                    <button onClick={() => setTab('disputes')} className="text-[#e85d24] text-xs hover:underline mt-1">
+                    <button onClick={() => setTab('disputes')} className="text-[#7c3aed] text-xs hover:underline mt-1">
                       +{disputes.length - 3} más →
                     </button>
                   )}
@@ -458,7 +458,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
 
             <div className="bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl p-5">
               <h3 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
-                <Swords size={14} className="text-[#e85d24]" />
+                <Swords size={14} className="text-[#7c3aed]" />
                 Partidas activas
               </h3>
               {activeMatches.length === 0 ? (
@@ -471,7 +471,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                     return (
                       <a key={m.id} href={`/match/${m.id}`} target="_blank" rel="noopener noreferrer"
                         className="flex items-center gap-3 hover:bg-[#111] rounded-xl px-3 py-2 transition-colors">
-                        <div className="w-2 h-2 rounded-full bg-[#e85d24] animate-pulse flex-shrink-0" />
+                        <div className="w-2 h-2 rounded-full bg-[#7c3aed] animate-pulse flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-xs font-semibold truncate">{m.tournament?.title}</p>
                           <p className="text-[#555] text-[10px]">
@@ -483,7 +483,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                     )
                   })}
                   {activeMatches.length > 3 && (
-                    <button onClick={() => setTab('matches')} className="text-[#e85d24] text-xs hover:underline mt-1">
+                    <button onClick={() => setTab('matches')} className="text-[#7c3aed] text-xs hover:underline mt-1">
                       +{activeMatches.length - 3} más →
                     </button>
                   )}
@@ -555,7 +555,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                         <p className="text-[#555] text-xs truncate">vs {p2n}</p>
                       </div>
                       <div>
-                        <p className="text-[#e85d24] font-bold text-sm">${m.tournament?.prize_pool}</p>
+                        <p className="text-[#7c3aed] font-bold text-sm">${m.tournament?.prize_pool}</p>
                         <p className="text-[#555] text-[10px]">MXN</p>
                       </div>
                       <div>
@@ -576,7 +576,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                           </span>
                         </div>
                         <a href={`/match/${m.id}`} target="_blank" rel="noopener noreferrer"
-                          className="text-[#e85d24] hover:underline text-xs flex-shrink-0">Ver →</a>
+                          className="text-[#7c3aed] hover:underline text-xs flex-shrink-0">Ver →</a>
                       </div>
                     </div>
                   )
@@ -604,10 +604,10 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
               const totalGames = u.wins + u.losses
               const wr = totalGames > 0 ? Math.round((u.wins / totalGames) * 100) : 0
               return (
-                <div key={u.id} className={`grid grid-cols-[1fr_100px_80px_80px_70px] gap-4 px-5 py-3.5 items-center hover:bg-[#111] transition-colors ${u.is_admin ? 'bg-[#e85d24]/2' : ''}`}>
+                <div key={u.id} className={`grid grid-cols-[1fr_100px_80px_80px_70px] gap-4 px-5 py-3.5 items-center hover:bg-[#111] transition-colors ${u.is_admin ? 'bg-[#7c3aed]/2' : ''}`}>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs flex-shrink-0 ${u.is_admin ? 'bg-[#e85d24]' : 'bg-[#2a2a2a]'}`}>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs flex-shrink-0 ${u.is_admin ? 'bg-[#7c3aed]' : 'bg-[#2a2a2a]'}`}>
                         {name[0].toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -617,7 +617,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                     </div>
                   </div>
                   <div>
-                    <p className={`text-sm font-bold ${u.balance > 0 ? 'text-[#e85d24]' : 'text-[#555]'}`}>
+                    <p className={`text-sm font-bold ${u.balance > 0 ? 'text-[#7c3aed]' : 'text-[#555]'}`}>
                       ${u.balance.toFixed(0)}
                     </p>
                     <p className="text-[#555] text-[10px]">MXN</p>
@@ -631,7 +631,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                   </div>
                   <div>
                     {u.is_admin ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#e85d24] bg-[#e85d24]/10 border border-[#e85d24]/20 px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#7c3aed] bg-[#7c3aed]/10 border border-[#7c3aed]/20 px-2 py-0.5 rounded-full">
                         <BadgeCheck size={10} /> Admin
                       </span>
                     ) : (

@@ -1,10 +1,10 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 :root {
-  --background: #0a0a0a;
+  --background: #0a0a0f;
   --foreground: #f5f5f5;
-  --accent: #e85d24;
-  --accent-hover: #d14d18;
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
   --card: #111111;
   --card-border: #222222;
   --muted: #888888;
@@ -33,7 +33,7 @@ body {
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #e85d24;
+  background: #7c3aed;
 }
 
 .glow-orange {
@@ -41,7 +41,7 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #e85d24, #ff8c5a);
+  background: linear-gradient(135deg, #7c3aed, #ff8c5a);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

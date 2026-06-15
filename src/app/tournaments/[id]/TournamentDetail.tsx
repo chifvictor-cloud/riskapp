@@ -35,24 +35,24 @@ function MatchFoundOverlay({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm">
       {/* Orange ambient glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#e85d24]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#7c3aed]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-lg mx-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-[#e85d24]/15 border border-[#e85d24]/30 rounded-full px-5 py-2 mb-4">
-            <div className="w-2 h-2 bg-[#e85d24] rounded-full animate-pulse" />
-            <span className="text-[#e85d24] text-sm font-bold uppercase tracking-widest">Partida encontrada</span>
+          <div className="inline-flex items-center gap-2 bg-[#7c3aed]/15 border border-[#7c3aed]/30 rounded-full px-5 py-2 mb-4">
+            <div className="w-2 h-2 bg-[#7c3aed] rounded-full animate-pulse" />
+            <span className="text-[#7c3aed] text-sm font-bold uppercase tracking-widest">Partida encontrada</span>
           </div>
           <h1 className="text-5xl font-black text-white leading-none">⚔️</h1>
-          <p className="text-[#888] mt-3 text-sm">{gameMode} · Premio: <span className="text-[#e85d24] font-bold">${prize} MXN</span></p>
+          <p className="text-[#888] mt-3 text-sm">{gameMode} · Premio: <span className="text-[#7c3aed] font-bold">${prize} MXN</span></p>
         </div>
 
         {/* Players */}
         <div className="flex items-center gap-4 mb-8">
           {/* Me */}
-          <div className="flex-1 bg-[#111] border border-[#e85d24]/40 rounded-2xl p-5 text-center shadow-[0_0_30px_rgba(232,93,36,0.15)]">
-            <div className="w-14 h-14 rounded-full bg-[#e85d24] flex items-center justify-center text-white font-black text-xl mx-auto mb-3">
+          <div className="flex-1 bg-[#111] border border-[#7c3aed]/40 rounded-2xl p-5 text-center shadow-[0_0_30px_rgba(124,58,237,0.15)]">
+            <div className="w-14 h-14 rounded-full bg-[#7c3aed] flex items-center justify-center text-white font-black text-xl mx-auto mb-3">
               {myEpic[0]?.toUpperCase() ?? 'T'}
             </div>
             <p className="text-[#888] text-xs mb-1">Tú</p>
@@ -76,7 +76,7 @@ function MatchFoundOverlay({
 
         {/* Instructions */}
         <div className="bg-[#0d0d0d] border border-[#1e1e1e] rounded-xl p-4 mb-6 text-center">
-          <Gamepad2 size={20} className="text-[#e85d24] mx-auto mb-2" />
+          <Gamepad2 size={20} className="text-[#7c3aed] mx-auto mb-2" />
           <p className="text-white font-semibold text-sm mb-1">¡Ya puedes empezar!</p>
           <p className="text-[#888] text-xs leading-relaxed">
             Agrega a tu rival en Epic Games y crea una partida personalizada.
@@ -86,7 +86,7 @@ function MatchFoundOverlay({
 
         <button
           onClick={handleGo}
-          className="w-full bg-[#e85d24] hover:bg-[#d14d18] text-white font-black py-4 rounded-xl transition-all text-lg shadow-[0_0_30px_rgba(232,93,36,0.3)]"
+          className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-black py-4 rounded-xl transition-all text-lg shadow-[0_0_30px_rgba(124,58,237,0.3)]"
         >
           {matchId ? 'Ir a la sala de partida →' : 'Ver detalles de la partida'}
         </button>
@@ -120,10 +120,10 @@ function PlayerSlot({ participant, isWinner, isMe }: { participant: Participant 
 
   return (
     <div className={`flex-1 rounded-xl p-4 flex flex-col items-center border ${
-      isWinner ? 'bg-[#e85d24]/10 border-[#e85d24]/40 shadow-[0_0_24px_rgba(232,93,36,0.12)]' : 'bg-[#111] border-[#222]'
+      isWinner ? 'bg-[#7c3aed]/10 border-[#7c3aed]/40 shadow-[0_0_24px_rgba(124,58,237,0.12)]' : 'bg-[#111] border-[#222]'
     }`}>
       <div className="relative mb-2">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-lg ${isWinner ? 'bg-[#e85d24]' : isMe ? 'bg-[#2a2a2a] border-2 border-[#e85d24]/40' : 'bg-[#333]'}`}>
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-lg ${isWinner ? 'bg-[#7c3aed]' : isMe ? 'bg-[#2a2a2a] border-2 border-[#7c3aed]/40' : 'bg-[#333]'}`}>
           {displayName[0].toUpperCase()}
         </div>
         {isWinner && (
@@ -134,12 +134,12 @@ function PlayerSlot({ participant, isWinner, isMe }: { participant: Participant 
       </div>
       <p className="text-white font-bold text-sm">{displayName}</p>
       {participant.epic_username && (
-        <p className="text-[#e85d24] text-xs mt-0.5 font-mono">{participant.epic_username}</p>
+        <p className="text-[#7c3aed] text-xs mt-0.5 font-mono">{participant.epic_username}</p>
       )}
       {isMe && <span className="text-[#555] text-xs mt-0.5">Tú</span>}
       <div className="flex gap-3 mt-3 text-center">
         <div><p className="text-white font-bold text-xs">{profile?.wins ?? 0}</p><p className="text-[#555] text-[10px]">W</p></div>
-        <div><p className="text-[#e85d24] font-bold text-xs">{winRate}%</p><p className="text-[#555] text-[10px]">WR</p></div>
+        <div><p className="text-[#7c3aed] font-bold text-xs">{winRate}%</p><p className="text-[#555] text-[10px]">WR</p></div>
         <div><p className="text-white font-bold text-xs">{profile?.points ?? 0}</p><p className="text-[#555] text-[10px]">pts</p></div>
       </div>
     </div>
@@ -172,7 +172,7 @@ export default function TournamentDetail({ tournament: init, participants: initP
   const isActiveMatch = match?.status === 'in_progress' && isInTournament
   const statusConfig = {
     open: { label: 'Abierto', color: 'text-green-400', bg: 'bg-green-400/10 border-green-400/20', dot: 'bg-green-400 animate-pulse' },
-    in_progress: { label: 'En curso', color: 'text-[#e85d24]', bg: 'bg-[#e85d24]/10 border-[#e85d24]/20', dot: 'bg-[#e85d24] animate-pulse' },
+    in_progress: { label: 'En curso', color: 'text-[#7c3aed]', bg: 'bg-[#7c3aed]/10 border-[#7c3aed]/20', dot: 'bg-[#7c3aed] animate-pulse' },
     completed: { label: 'Completado', color: 'text-[#888]', bg: 'bg-[#888]/10 border-[#888]/20', dot: 'bg-[#888]' },
     cancelled: { label: 'Cancelado', color: 'text-red-400', bg: 'bg-red-400/10 border-red-400/20', dot: 'bg-red-400' },
   }
@@ -319,7 +319,7 @@ export default function TournamentDetail({ tournament: init, participants: initP
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[#e85d24] font-black text-xl">${tournament.prize_pool}</p>
+            <p className="text-[#7c3aed] font-black text-xl">${tournament.prize_pool}</p>
             <p className="text-[#888] text-xs">MXN</p>
           </div>
         </div>
@@ -327,7 +327,7 @@ export default function TournamentDetail({ tournament: init, participants: initP
         {/* Players matchup */}
         <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-2xl p-5">
           <h2 className="text-white font-bold mb-4 flex items-center gap-2 text-sm">
-            <Swords size={15} className="text-[#e85d24]" /> Jugadores
+            <Swords size={15} className="text-[#7c3aed]" /> Jugadores
           </h2>
           <div className="flex items-stretch gap-3">
             <PlayerSlot participant={player1} isWinner={!!match?.winner_id && match.winner_id === player1?.player_id} isMe={player1?.player_id === userId} />
@@ -348,12 +348,12 @@ export default function TournamentDetail({ tournament: init, participants: initP
                   <button
                     onClick={() => setShowJoinForm(true)}
                     disabled={isPending}
-                    className="w-full bg-[#e85d24] hover:bg-[#d14d18] disabled:opacity-50 text-white font-black text-lg py-4 rounded-xl transition-all shadow-[0_0_25px_rgba(232,93,36,0.2)] hover:shadow-[0_0_35px_rgba(232,93,36,0.35)]"
+                    className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-50 text-white font-black text-lg py-4 rounded-xl transition-all shadow-[0_0_25px_rgba(124,58,237,0.2)] hover:shadow-[0_0_35px_rgba(124,58,237,0.35)]"
                   >
                     {isPending ? 'Procesando...' : `Aceptar reto · $${tournament.entry_fee} MXN`}
                   </button>
                 ) : (
-                  <div className="bg-[#0d0d0d] border border-[#e85d24]/30 rounded-2xl p-5">
+                  <div className="bg-[#0d0d0d] border border-[#7c3aed]/30 rounded-2xl p-5">
                     <h3 className="text-white font-bold mb-1">Tu nombre en Epic Games</h3>
                     <p className="text-[#888] text-xs mb-4">
                       Tu rival verá este nombre para agregarte en Fortnite
@@ -364,14 +364,14 @@ export default function TournamentDetail({ tournament: init, participants: initP
                       onChange={e => setEpicInput(e.target.value)}
                       placeholder="EpicUsername123"
                       maxLength={32}
-                      className="w-full bg-[#111] border border-[#222] focus:border-[#e85d24] rounded-xl px-4 py-3 text-white placeholder-[#444] outline-none transition-colors mb-3 font-mono"
+                      className="w-full bg-[#111] border border-[#222] focus:border-[#7c3aed] rounded-xl px-4 py-3 text-white placeholder-[#444] outline-none transition-colors mb-3 font-mono"
                       autoFocus
                     />
                     <div className="flex gap-2">
                       <button
                         onClick={handleJoin}
                         disabled={!epicInput.trim() || isPending}
-                        className="flex-1 bg-[#e85d24] hover:bg-[#d14d18] disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors"
+                        className="flex-1 bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-40 text-white font-bold py-3 rounded-xl transition-colors"
                       >
                         {isPending ? 'Uniéndose...' : `Confirmar · $${tournament.entry_fee} MXN`}
                       </button>
@@ -390,7 +390,7 @@ export default function TournamentDetail({ tournament: init, participants: initP
             {/* WAITING */}
             {tournament.status === 'open' && isInTournament && (
               <div className="bg-[#0d0d0d] border border-[#1e1e1e] rounded-2xl p-6 text-center">
-                <Clock size={28} className="text-[#e85d24] mx-auto mb-3 animate-pulse" />
+                <Clock size={28} className="text-[#7c3aed] mx-auto mb-3 animate-pulse" />
                 <h3 className="text-white font-bold mb-1">Esperando rival</h3>
                 <p className="text-[#888] text-sm">
                   Cuando alguien acepte el reto, ambos verán la pantalla de partida encontrada.
@@ -398,12 +398,12 @@ export default function TournamentDetail({ tournament: init, participants: initP
                 {userParticipant?.epic_username && (
                   <div className="mt-4 inline-flex items-center gap-2 bg-[#111] border border-[#222] rounded-lg px-3 py-1.5">
                     <span className="text-[#888] text-xs">Tu Epic:</span>
-                    <span className="text-[#e85d24] text-sm font-mono font-bold">{userParticipant.epic_username}</span>
+                    <span className="text-[#7c3aed] text-sm font-mono font-bold">{userParticipant.epic_username}</span>
                   </div>
                 )}
                 <div className="flex justify-center gap-1.5 mt-5">
                   {[0, 1, 2, 3].map(i => (
-                    <div key={i} className="w-2 h-2 rounded-full bg-[#e85d24] animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                    <div key={i} className="w-2 h-2 rounded-full bg-[#7c3aed] animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
                   ))}
                 </div>
               </div>
@@ -411,16 +411,16 @@ export default function TournamentDetail({ tournament: init, participants: initP
 
             {/* IN_PROGRESS — report result */}
             {isActiveMatch && !match?.winner_id && (
-              <div className="bg-[#0d0d0d] border border-[#e85d24]/20 rounded-2xl p-5">
+              <div className="bg-[#0d0d0d] border border-[#7c3aed]/20 rounded-2xl p-5">
                 <h3 className="text-white font-bold mb-1 flex items-center gap-2">
-                  <Trophy size={15} className="text-[#e85d24]" />
+                  <Trophy size={15} className="text-[#7c3aed]" />
                   ¿Terminaron la partida?
                 </h3>
                 <p className="text-[#888] text-sm mb-4">Reporta el resultado honestamente.</p>
                 {!reportingResult ? (
                   <button
                     onClick={() => setReportingResult(true)}
-                    className="w-full bg-[#e85d24] hover:bg-[#d14d18] text-white font-bold py-3 rounded-xl transition-colors"
+                    className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold py-3 rounded-xl transition-colors"
                   >
                     Reportar resultado
                   </button>
@@ -432,16 +432,16 @@ export default function TournamentDetail({ tournament: init, participants: initP
                         key={p!.player_id}
                         onClick={() => handleReportResult(p!.player_id)}
                         disabled={isPending}
-                        className="w-full flex items-center gap-3 bg-[#111] hover:bg-[#1a1a1a] border border-[#1e1e1e] hover:border-[#e85d24]/40 text-white py-3 px-4 rounded-xl transition-all disabled:opacity-50"
+                        className="w-full flex items-center gap-3 bg-[#111] hover:bg-[#1a1a1a] border border-[#1e1e1e] hover:border-[#7c3aed]/40 text-white py-3 px-4 rounded-xl transition-all disabled:opacity-50"
                       >
-                        <div className="w-8 h-8 rounded-full bg-[#e85d24]/15 flex items-center justify-center text-[#e85d24] font-bold text-sm">
+                        <div className="w-8 h-8 rounded-full bg-[#7c3aed]/15 flex items-center justify-center text-[#7c3aed] font-bold text-sm">
                           {(p!.profiles?.display_name || p!.profiles?.username || '?')[0].toUpperCase()}
                         </div>
                         <div className="text-left">
                           <p className="font-semibold text-sm">{p!.profiles?.display_name || p!.profiles?.username}{p!.player_id === userId && ' (yo)'}</p>
-                          {p!.epic_username && <p className="text-[#e85d24] text-xs font-mono">{p!.epic_username}</p>}
+                          {p!.epic_username && <p className="text-[#7c3aed] text-xs font-mono">{p!.epic_username}</p>}
                         </div>
-                        <Trophy size={13} className="ml-auto text-[#e85d24]" />
+                        <Trophy size={13} className="ml-auto text-[#7c3aed]" />
                       </button>
                     ))}
                     <button onClick={() => setReportingResult(false)} className="w-full text-[#555] text-xs py-2 hover:text-[#888]">
@@ -454,7 +454,7 @@ export default function TournamentDetail({ tournament: init, participants: initP
           </>
         ) : (
           tournament.status === 'open' && (
-            <a href="/auth/login" className="block w-full text-center bg-[#e85d24] hover:bg-[#d14d18] text-white font-black text-lg py-4 rounded-xl transition-colors">
+            <a href="/auth/login" className="block w-full text-center bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-black text-lg py-4 rounded-xl transition-colors">
               Inicia sesión para unirte
             </a>
           )
@@ -470,11 +470,11 @@ export default function TournamentDetail({ tournament: init, participants: initP
                 || participants.find(p => p.player_id === match.winner_id)?.profiles?.username || '—'}
             </p>
             {participants.find(p => p.player_id === match.winner_id)?.epic_username && (
-              <p className="text-[#e85d24] text-sm font-mono mt-1">
+              <p className="text-[#7c3aed] text-sm font-mono mt-1">
                 {participants.find(p => p.player_id === match.winner_id)?.epic_username}
               </p>
             )}
-            <p className="text-[#888] text-xs mt-2">Premio cobrado: <span className="text-[#e85d24] font-bold">${tournament.prize_pool} MXN</span></p>
+            <p className="text-[#888] text-xs mt-2">Premio cobrado: <span className="text-[#7c3aed] font-bold">${tournament.prize_pool} MXN</span></p>
           </div>
         )}
       </div>

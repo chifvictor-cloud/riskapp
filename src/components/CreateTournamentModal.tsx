@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
@@ -6,9 +6,9 @@ import { createTournament } from '@/app/tournaments/[id]/actions'
 import { X, Trophy, Hammer, Zap, AlertCircle, ChevronRight } from 'lucide-react'
 
 const FORMATS = [
-  { value: 'No Build', label: 'No Build', desc: 'Sin construcciones. Puro aim.', icon: <Trophy size={22} className="text-[#e85d24]" /> },
-  { value: 'Construcción', label: 'Construcción', desc: 'Con edificación completa.', icon: <Hammer size={22} className="text-[#e85d24]" /> },
-  { value: 'Zero Build', label: 'Zero Build', desc: 'Escudos de adrenalina.', icon: <Zap size={22} className="text-[#e85d24]" /> },
+  { value: 'No Build', label: 'No Build', desc: 'Sin construcciones. Puro aim.', icon: <Trophy size={22} className="text-[#7c3aed]" /> },
+  { value: 'Construcción', label: 'Construcción', desc: 'Con edificación completa.', icon: <Hammer size={22} className="text-[#7c3aed]" /> },
+  { value: 'Zero Build', label: 'Zero Build', desc: 'Escudos de adrenalina.', icon: <Zap size={22} className="text-[#7c3aed]" /> },
 ]
 
 const ENTRY_FEES = [20, 50, 100, 150, 200, 300, 500, 1000]
@@ -49,7 +49,7 @@ export default function CreateTournamentModal({ onClose, defaultEpicUsername }: 
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#1a1a1a]">
           <div>
-            <p className="text-[#e85d24] text-xs font-bold uppercase tracking-widest mb-0.5">Nuevo torneo</p>
+            <p className="text-[#7c3aed] text-xs font-bold uppercase tracking-widest mb-0.5">Nuevo torneo</p>
             <h2 className="text-white font-black text-lg">
               {step === 1 && 'Elige el formato'}
               {step === 2 && 'Cuota de entrada'}
@@ -64,7 +64,7 @@ export default function CreateTournamentModal({ onClose, defaultEpicUsername }: 
         {/* Steps indicator */}
         <div className="flex px-6 py-3 gap-1.5">
           {[1, 2, 3].map(s => (
-            <div key={s} className={`h-1 flex-1 rounded-full transition-all ${s <= step ? 'bg-[#e85d24]' : 'bg-[#222]'}`} />
+            <div key={s} className={`h-1 flex-1 rounded-full transition-all ${s <= step ? 'bg-[#7c3aed]' : 'bg-[#222]'}`} />
           ))}
         </div>
 
@@ -86,11 +86,11 @@ export default function CreateTournamentModal({ onClose, defaultEpicUsername }: 
                   onClick={() => { setFormat(f.value); setStep(2) }}
                   className={`w-full flex items-center gap-3 p-4 rounded-xl border text-left transition-all ${
                     format === f.value
-                      ? 'border-[#e85d24] bg-[#e85d24]/8'
+                      ? 'border-[#7c3aed] bg-[#7c3aed]/8'
                       : 'border-[#222] bg-[#111] hover:border-[#2e2e2e] hover:bg-[#141414]'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${format === f.value ? 'bg-[#e85d24]/15' : 'bg-[#1a1a1a]'}`}>
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${format === f.value ? 'bg-[#7c3aed]/15' : 'bg-[#1a1a1a]'}`}>
                     {f.icon}
                   </div>
                   <div className="flex-1">
@@ -113,7 +113,7 @@ export default function CreateTournamentModal({ onClose, defaultEpicUsername }: 
                     onClick={() => { setEntryFee(fee); setStep(3) }}
                     className={`py-3.5 rounded-xl border font-black text-sm transition-all ${
                       entryFee === fee
-                        ? 'border-[#e85d24] bg-[#e85d24]/10 text-white'
+                        ? 'border-[#7c3aed] bg-[#7c3aed]/10 text-white'
                         : 'border-[#222] bg-[#111] text-[#888] hover:border-[#2e2e2e] hover:text-white'
                     }`}
                   >
@@ -138,7 +138,7 @@ export default function CreateTournamentModal({ onClose, defaultEpicUsername }: 
                 placeholder="TuNombreEnEpic"
                 maxLength={32}
                 autoFocus
-                className="w-full bg-[#111] border border-[#222] focus:border-[#e85d24] rounded-xl px-4 py-3 text-white placeholder-[#444] outline-none transition-colors mb-4 font-mono"
+                className="w-full bg-[#111] border border-[#222] focus:border-[#7c3aed] rounded-xl px-4 py-3 text-white placeholder-[#444] outline-none transition-colors mb-4 font-mono"
               />
 
               {/* Summary */}
@@ -147,14 +147,14 @@ export default function CreateTournamentModal({ onClose, defaultEpicUsername }: 
                 <div className="flex justify-between"><span className="text-[#888]">Tu entrada</span><span className="text-white font-semibold">${entryFee} MXN</span></div>
                 <div className="flex justify-between border-t border-[#1a1a1a] pt-2">
                   <span className="text-[#888]">Premio si ganas</span>
-                  <span className="text-[#e85d24] font-black">${prizePool} MXN</span>
+                  <span className="text-[#7c3aed] font-black">${prizePool} MXN</span>
                 </div>
               </div>
 
               <button
                 onClick={handleSubmit}
                 disabled={!epicUsername.trim() || isPending}
-                className="w-full bg-[#e85d24] hover:bg-[#d14d18] disabled:opacity-40 text-white font-black py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(232,93,36,0.2)]"
+                className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-40 text-white font-black py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(124,58,237,0.2)]"
               >
                 {isPending ? 'Creando...' : 'Crear torneo y entrar como J1'}
               </button>

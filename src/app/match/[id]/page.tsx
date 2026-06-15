@@ -45,7 +45,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-[#0a0a0f]">
       <Navbar />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-24 pb-16">
         <Link href={`/tournaments/${match.tournament_id}`} className="inline-flex items-center gap-1.5 text-[#888] hover:text-white text-sm transition-colors mb-6">
@@ -54,11 +54,11 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         </Link>
 
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-8 h-8 bg-[#e85d24]/10 rounded-lg flex items-center justify-center">
-            <Swords size={16} className="text-[#e85d24]" />
+          <div className="w-8 h-8 bg-[#7c3aed]/10 rounded-lg flex items-center justify-center">
+            <Swords size={16} className="text-[#7c3aed]" />
           </div>
           <div>
-            <p className="text-[#e85d24] text-xs font-bold uppercase tracking-widest">Sala de partida</p>
+            <p className="text-[#7c3aed] text-xs font-bold uppercase tracking-widest">Sala de partida</p>
             <p className="text-[#555] text-xs font-mono">{id.slice(0, 8)}…</p>
           </div>
         </div>
