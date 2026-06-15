@@ -126,15 +126,15 @@ export default async function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen bg-[#08071a]">
       <Navbar />
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <div className="flex items-center gap-3 mb-10">
-          <div className="w-10 h-10 bg-[#7c3aed]/10 rounded-xl flex items-center justify-center">
-            <ShieldCheck size={20} className="text-[#7c3aed]" />
+          <div className="w-10 h-10 bg-[#8b5cf6]/10 rounded-xl flex items-center justify-center">
+            <ShieldCheck size={20} className="text-[#8b5cf6]" />
           </div>
           <div>
-            <p className="text-[#7c3aed] text-xs font-bold uppercase tracking-widest mb-0.5">Solo administradores</p>
+            <p className="text-[#8b5cf6] text-xs font-bold uppercase tracking-widest mb-0.5">Solo administradores</p>
             <h1 className="text-3xl font-black text-white leading-none">Panel de Admin</h1>
           </div>
         </div>

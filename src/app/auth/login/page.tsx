@@ -42,15 +42,15 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#08071a] flex items-center justify-center px-4">
       {/* Background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#7c3aed]/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#8b5cf6]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-[#7c3aed] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#8b5cf6] rounded-lg flex items-center justify-center">
               <span className="text-white font-black text-lg">R</span>
             </div>
             <span className="text-white font-black text-2xl tracking-wider">RISK</span>
@@ -59,7 +59,7 @@ export default function LoginPage() {
           <p className="text-[#888] mt-2">Inicia sesión en tu cuenta</p>
         </div>
 
-        <div className="bg-[#111] border border-[#222] rounded-2xl p-8">
+        <div className="bg-[#0f0e2a] border border-[#272454] rounded-2xl p-8">
           {error && (
             <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-6">
               <AlertCircle size={16} className="text-red-400 flex-shrink-0" />
@@ -83,9 +83,9 @@ export default function LoginPage() {
           </button>
 
           <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-[#222]" />
+            <div className="flex-1 h-px bg-[#272454]" />
             <span className="text-[#888] text-sm">o</span>
-            <div className="flex-1 h-px bg-[#222]" />
+            <div className="flex-1 h-px bg-[#272454]" />
           </div>
 
           <form onSubmit={handleEmailLogin} className="space-y-4">
@@ -99,7 +99,7 @@ export default function LoginPage() {
                   onChange={e => setEmail(e.target.value)}
                   required
                   placeholder="tu@email.com"
-                  className="w-full bg-[#0a0a0f] border border-[#222] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#7c3aed] transition-colors"
+                  className="w-full bg-[#08071a] border border-[#272454] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#8b5cf6] transition-colors"
                 />
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function LoginPage() {
                   onChange={e => setPassword(e.target.value)}
                   required
                   placeholder="••••••••"
-                  className="w-full bg-[#0a0a0f] border border-[#222] rounded-lg pl-10 pr-12 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#7c3aed] transition-colors"
+                  className="w-full bg-[#08071a] border border-[#272454] rounded-lg pl-10 pr-12 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#8b5cf6] transition-colors"
                 />
                 <button
                   type="button"
@@ -127,7 +127,7 @@ export default function LoginPage() {
             </div>
 
             <div className="flex justify-end">
-              <Link href="/auth/reset-password" className="text-[#7c3aed] text-sm hover:underline">
+              <Link href="/auth/reset-password" className="text-[#8b5cf6] text-sm hover:underline">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
@@ -135,7 +135,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors"
+              className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors"
             >
               {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </button>
@@ -144,7 +144,7 @@ export default function LoginPage() {
 
         <p className="text-center text-[#888] mt-6">
           ¿No tienes cuenta?{' '}
-          <Link href="/auth/register" className="text-[#7c3aed] font-semibold hover:underline">
+          <Link href="/auth/register" className="text-[#8b5cf6] font-semibold hover:underline">
             Regístrate gratis
           </Link>
         </p>

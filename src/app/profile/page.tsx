@@ -53,32 +53,32 @@ export default async function ProfilePage() {
   })
 
   const stats = [
-    { label: 'Balance', value: `$${profile.balance.toFixed(2)}`, sub: 'MXN', icon: <Wallet size={16} className="text-[#7c3aed]" />, accent: true },
-    { label: 'Ganancias', value: `$${profile.total_earnings.toFixed(0)}`, sub: 'MXN totales', icon: <TrendingUp size={16} className="text-[#7c3aed]" /> },
-    { label: 'Victorias', value: profile.wins, sub: 'ganadas', icon: <Trophy size={16} className="text-[#7c3aed]" /> },
-    { label: 'Derrotas', value: profile.losses, sub: 'perdidas', icon: <Swords size={16} className="text-[#7c3aed]" /> },
-    { label: 'Win Rate', value: `${winRate}%`, sub: `${totalMatches} partidas`, icon: <Target size={16} className="text-[#7c3aed]" /> },
-    { label: 'Puntos', value: profile.points, sub: 'acumulados', icon: <Star size={16} className="text-[#7c3aed]" /> },
+    { label: 'Balance', value: `$${profile.balance.toFixed(2)}`, sub: 'MXN', icon: <Wallet size={16} className="text-[#8b5cf6]" />, accent: true },
+    { label: 'Ganancias', value: `$${profile.total_earnings.toFixed(0)}`, sub: 'MXN totales', icon: <TrendingUp size={16} className="text-[#8b5cf6]" /> },
+    { label: 'Victorias', value: profile.wins, sub: 'ganadas', icon: <Trophy size={16} className="text-[#8b5cf6]" /> },
+    { label: 'Derrotas', value: profile.losses, sub: 'perdidas', icon: <Swords size={16} className="text-[#8b5cf6]" /> },
+    { label: 'Win Rate', value: `${winRate}%`, sub: `${totalMatches} partidas`, icon: <Target size={16} className="text-[#8b5cf6]" /> },
+    { label: 'Puntos', value: profile.points, sub: 'acumulados', icon: <Star size={16} className="text-[#8b5cf6]" /> },
   ]
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen bg-[#08071a]">
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
 
         {/* Hero card */}
-        <div className="relative bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl p-6 sm:p-8 mb-6 overflow-hidden">
+        <div className="relative bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-6 sm:p-8 mb-6 overflow-hidden">
           {/* Glow */}
-          <div className="absolute top-0 left-0 w-64 h-64 bg-[#7c3aed]/5 rounded-full blur-3xl pointer-events-none -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute top-0 left-0 w-64 h-64 bg-[#8b5cf6]/5 rounded-full blur-3xl pointer-events-none -translate-x-1/2 -translate-y-1/2" />
 
           <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5">
             {/* Avatar */}
             <div className="relative flex-shrink-0">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#7c3aed] flex items-center justify-center shadow-[0_0_40px_rgba(124,58,237,0.3)]">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#8b5cf6] flex items-center justify-center shadow-[0_0_40px_rgba(139,92,246,0.3)]">
                 <span className="text-white font-black text-4xl sm:text-5xl">{initial}</span>
               </div>
               {profile.is_admin && (
-                <div className="absolute -top-1.5 -right-1.5 bg-[#7c3aed] rounded-full px-1.5 py-0.5 text-white text-[9px] font-black tracking-wider">
+                <div className="absolute -top-1.5 -right-1.5 bg-[#8b5cf6] rounded-full px-1.5 py-0.5 text-white text-[9px] font-black tracking-wider">
                   ADMIN
                 </div>
               )}
@@ -103,8 +103,8 @@ export default async function ProfilePage() {
                 </div>
                 {profile.fortnite_username && (
                   <div className="flex items-center gap-1.5">
-                    <Gamepad2 size={13} className="text-[#7c3aed]" />
-                    <span className="text-[#7c3aed] font-mono font-semibold text-sm">{profile.fortnite_username}</span>
+                    <Gamepad2 size={13} className="text-[#8b5cf6]" />
+                    <span className="text-[#8b5cf6] font-mono font-semibold text-sm">{profile.fortnite_username}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1.5 text-[#555]">
@@ -117,7 +117,7 @@ export default async function ProfilePage() {
             {/* CTA */}
             <Link
               href="/tournaments"
-              className="flex-shrink-0 inline-flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold px-4 py-2.5 rounded-xl transition-colors text-sm shadow-[0_0_16px_rgba(124,58,237,0.2)]"
+              className="flex-shrink-0 inline-flex items-center gap-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold px-4 py-2.5 rounded-xl transition-colors text-sm shadow-[0_0_16px_rgba(139,92,246,0.2)]"
             >
               <Swords size={14} />
               Jugar
@@ -130,15 +130,15 @@ export default async function ProfilePage() {
           {stats.map((s, i) => (
             <div
               key={i}
-              className={`bg-[#0e0e0e] border rounded-xl p-4 ${s.accent ? 'border-[#7c3aed]/25' : 'border-[#1a1a1a]'}`}
+              className={`bg-[#0f0e2a] border rounded-xl p-4 ${s.accent ? 'border-[#8b5cf6]/25' : 'border-[#1e1b4b]'}`}
             >
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[#555] text-xs">{s.label}</span>
-                <div className="w-6 h-6 bg-[#7c3aed]/10 rounded-md flex items-center justify-center">
+                <div className="w-6 h-6 bg-[#8b5cf6]/10 rounded-md flex items-center justify-center">
                   {s.icon}
                 </div>
               </div>
-              <div className={`font-black text-xl leading-none ${s.accent ? 'text-[#7c3aed]' : 'text-white'}`}>
+              <div className={`font-black text-xl leading-none ${s.accent ? 'text-[#8b5cf6]' : 'text-white'}`}>
                 {s.value}
               </div>
               <div className="text-[#444] text-[10px] mt-1">{s.sub}</div>
@@ -148,15 +148,15 @@ export default async function ProfilePage() {
 
         {/* Fortnite username prompt */}
         {!profile.fortnite_username && (
-          <div className="bg-[#7c3aed]/5 border border-[#7c3aed]/20 rounded-2xl px-5 py-4 mb-6 flex items-center gap-3">
-            <Gamepad2 size={18} className="text-[#7c3aed] flex-shrink-0" />
+          <div className="bg-[#8b5cf6]/5 border border-[#8b5cf6]/20 rounded-2xl px-5 py-4 mb-6 flex items-center gap-3">
+            <Gamepad2 size={18} className="text-[#8b5cf6] flex-shrink-0" />
             <div className="flex-1">
               <p className="text-white text-sm font-semibold">Agrega tu nombre de Epic Games</p>
               <p className="text-[#888] text-xs mt-0.5">Lo necesitas para que tus rivales puedan encontrarte en Fortnite</p>
             </div>
             <Link
               href="/tournaments"
-              className="text-[#7c3aed] text-xs font-bold hover:underline flex-shrink-0"
+              className="text-[#8b5cf6] text-xs font-bold hover:underline flex-shrink-0"
             >
               Se pide al crear torneo →
             </Link>
@@ -164,10 +164,10 @@ export default async function ProfilePage() {
         )}
 
         {/* Match history */}
-        <div className="bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#1a1a1a]">
+        <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#1e1b4b]">
             <h2 className="text-white font-bold flex items-center gap-2">
-              <Swords size={15} className="text-[#7c3aed]" />
+              <Swords size={15} className="text-[#8b5cf6]" />
               Historial de partidas
             </h2>
             <span className="text-[#555] text-xs">{matches.length} recientes</span>
@@ -175,20 +175,20 @@ export default async function ProfilePage() {
 
           {matches.length === 0 ? (
             <div className="py-16 text-center">
-              <div className="w-14 h-14 bg-[#111] border border-[#1e1e1e] rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Swords size={22} className="text-[#2a2a2a]" />
+              <div className="w-14 h-14 bg-[#0f0e2a] border border-[#201e50] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Swords size={22} className="text-[#2d2960]" />
               </div>
               <p className="text-white font-bold mb-1">Sin partidas todavía</p>
               <p className="text-[#555] text-sm mb-5">Únete a tu primer torneo y empieza a competir</p>
               <Link
                 href="/tournaments"
-                className="inline-flex items-center gap-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm"
+                className="inline-flex items-center gap-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold px-5 py-2.5 rounded-xl transition-colors text-sm"
               >
                 Ver torneos disponibles
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-[#111]">
+            <div className="divide-y divide-[#0f0e2a]">
               {matches.map((m: any) => {
                 const isPlayer1 = m.player1_id === user.id
                 const opponent = isPlayer1 ? m.player2 : m.player1
@@ -205,18 +205,18 @@ export default async function ProfilePage() {
                   <Link
                     key={m.id}
                     href={isPending || isDisputed ? `/match/${m.id}` : `/tournaments/${m.tournament?.id ?? ''}`}
-                    className="flex items-center gap-4 px-5 py-4 hover:bg-[#111] transition-colors group"
+                    className="flex items-center gap-4 px-5 py-4 hover:bg-[#0f0e2a] transition-colors group"
                   >
                     {/* Result dot */}
                     <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                      isPending ? 'bg-[#7c3aed] animate-pulse' :
+                      isPending ? 'bg-[#8b5cf6] animate-pulse' :
                       isDisputed ? 'bg-yellow-400 animate-pulse' :
                       isWinner ? 'bg-green-400' : 'bg-red-400'
                     }`} />
 
                     {/* Match info */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-semibold truncate group-hover:text-[#7c3aed] transition-colors">
+                      <p className="text-white text-sm font-semibold truncate group-hover:text-[#8b5cf6] transition-colors">
                         vs {opponentName}
                       </p>
                       <p className="text-[#555] text-xs mt-0.5 truncate">
@@ -227,7 +227,7 @@ export default async function ProfilePage() {
                     {/* Prize + result */}
                     <div className="text-right flex-shrink-0">
                       {isPending ? (
-                        <span className="text-[#7c3aed] text-xs font-bold">En curso</span>
+                        <span className="text-[#8b5cf6] text-xs font-bold">En curso</span>
                       ) : isDisputed ? (
                         <span className="text-yellow-400 text-xs font-bold">En disputa</span>
                       ) : m.winner_id ? (
@@ -236,16 +236,16 @@ export default async function ProfilePage() {
                             {isWinner ? 'Victoria' : 'Derrota'}
                           </p>
                           {isWinner && m.tournament?.prize_pool && (
-                            <p className="text-[#7c3aed] text-xs font-mono">+${m.tournament.prize_pool}</p>
+                            <p className="text-[#8b5cf6] text-xs font-mono">+${m.tournament.prize_pool}</p>
                           )}
                         </>
                       ) : (
                         <span className="text-[#555] text-xs">Sin resultado</span>
                       )}
-                      <p className="text-[#333] text-[10px] mt-0.5">{date}</p>
+                      <p className="text-[#3a375e] text-[10px] mt-0.5">{date}</p>
                     </div>
 
-                    <ChevronRight size={14} className="text-[#2a2a2a] group-hover:text-[#555] transition-colors flex-shrink-0" />
+                    <ChevronRight size={14} className="text-[#2d2960] group-hover:text-[#555] transition-colors flex-shrink-0" />
                   </Link>
                 )
               })}

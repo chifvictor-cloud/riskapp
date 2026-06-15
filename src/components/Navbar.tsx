@@ -43,12 +43,12 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0a0f]/95 backdrop-blur-sm border-b border-[#222]">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#08071a]/95 backdrop-blur-sm border-b border-[#272454]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#7c3aed] rounded-sm flex items-center justify-center">
+            <div className="w-8 h-8 bg-[#8b5cf6] rounded-sm flex items-center justify-center">
               <span className="text-white font-black text-sm">R</span>
             </div>
             <span className="text-white font-black text-xl tracking-wider">RISK</span>
@@ -73,13 +73,13 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                <div className="flex items-center gap-2 bg-[#111] border border-[#222] rounded-lg px-3 py-1.5">
-                  <Wallet size={14} className="text-[#7c3aed]" />
+                <div className="flex items-center gap-2 bg-[#0f0e2a] border border-[#272454] rounded-lg px-3 py-1.5">
+                  <Wallet size={14} className="text-[#8b5cf6]" />
                   <span className="text-white font-semibold text-sm">${balance.toFixed(2)}</span>
                 </div>
                 <Link
                   href="/profile"
-                  className="w-8 h-8 rounded-full bg-[#7c3aed] flex items-center justify-center text-white font-bold text-sm"
+                  className="w-8 h-8 rounded-full bg-[#8b5cf6] flex items-center justify-center text-white font-bold text-sm"
                 >
                   {user.email?.[0].toUpperCase()}
                 </Link>
@@ -101,7 +101,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+                  className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
                 >
                   Registrarse
                 </Link>
@@ -121,7 +121,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden bg-[#111] border-t border-[#222] px-4 py-4 space-y-3">
+        <div className="md:hidden bg-[#0f0e2a] border-t border-[#272454] px-4 py-4 space-y-3">
           <Link href="/tournaments" className="block text-[#888] hover:text-white py-2">Torneos</Link>
           <Link href="/leaderboard" className="block text-[#888] hover:text-white py-2">Ranking</Link>
           {user ? (
@@ -135,7 +135,7 @@ export default function Navbar() {
           ) : (
             <>
               <Link href="/auth/login" className="block text-[#888] hover:text-white py-2">Iniciar sesión</Link>
-              <Link href="/auth/register" className="block bg-[#7c3aed] text-white py-2 px-4 rounded-lg text-center font-semibold">
+              <Link href="/auth/register" className="block bg-[#8b5cf6] text-white py-2 px-4 rounded-lg text-center font-semibold">
                 Registrarse
               </Link>
             </>

@@ -53,7 +53,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
   })
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen bg-[#08071a]">
       <Navbar />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <Link href="/tournaments" className="inline-flex items-center gap-1.5 text-[#888] hover:text-white text-sm transition-colors mb-6">
@@ -64,7 +64,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left: static info */}
           <div className="lg:col-span-1 space-y-4">
-            <div className="bg-[#111] border border-[#1e1e1e] rounded-2xl p-5">
+            <div className="bg-[#0f0e2a] border border-[#201e50] rounded-2xl p-5">
               <h1 className="text-white font-black text-xl mb-4 leading-tight">{tournament.title}</h1>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -75,9 +75,9 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
                   <div className="flex items-center gap-2 text-[#888] text-sm"><DollarSign size={13} />Entrada</div>
                   <span className="text-white text-sm font-semibold">${tournament.entry_fee} MXN</span>
                 </div>
-                <div className="flex items-center justify-between border-t border-[#1a1a1a] pt-3">
+                <div className="flex items-center justify-between border-t border-[#1e1b4b] pt-3">
                   <div className="flex items-center gap-2 text-[#888] text-sm"><DollarSign size={13} />Premio</div>
-                  <span className="text-[#7c3aed] font-black">${tournament.prize_pool} MXN</span>
+                  <span className="text-[#8b5cf6] font-black">${tournament.prize_pool} MXN</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-[#888] text-sm"><Calendar size={13} />Creado</div>
@@ -87,7 +87,7 @@ export default async function TournamentPage({ params }: { params: Promise<{ id:
             </div>
 
             {tournament.rules && (
-              <div className="bg-[#111] border border-[#1e1e1e] rounded-2xl p-5">
+              <div className="bg-[#0f0e2a] border border-[#201e50] rounded-2xl p-5">
                 <h3 className="text-white font-bold mb-2 text-sm">Reglas</h3>
                 <p className="text-[#888] text-sm leading-relaxed">{tournament.rules}</p>
               </div>

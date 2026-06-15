@@ -42,12 +42,12 @@ function PlayerCard({
   return (
     <div className={`flex-1 rounded-2xl p-5 border flex flex-col items-center gap-2 ${
       isWinner
-        ? 'bg-[#7c3aed]/10 border-[#7c3aed]/50 shadow-[0_0_30px_rgba(124,58,237,0.15)]'
-        : 'bg-[#111] border-[#1e1e1e]'
+        ? 'bg-[#8b5cf6]/10 border-[#8b5cf6]/50 shadow-[0_0_30px_rgba(139,92,246,0.15)]'
+        : 'bg-[#0f0e2a] border-[#201e50]'
     }`}>
       <div className="relative">
         <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-black text-xl ${
-          isWinner ? 'bg-[#7c3aed]' : isMe ? 'bg-[#1e1e1e] border-2 border-[#7c3aed]/40' : 'bg-[#2a2a2a]'
+          isWinner ? 'bg-[#8b5cf6]' : isMe ? 'bg-[#201e50] border-2 border-[#8b5cf6]/40' : 'bg-[#2d2960]'
         }`}>
           {name[0].toUpperCase()}
         </div>
@@ -60,7 +60,7 @@ function PlayerCard({
       <div className="text-center">
         <p className="text-white font-bold text-sm">{name}{isMe && <span className="text-[#555] font-normal"> (tú)</span>}</p>
         {participant.epic_username && (
-          <p className="text-[#7c3aed] text-xs font-mono mt-0.5">{participant.epic_username}</p>
+          <p className="text-[#8b5cf6] text-xs font-mono mt-0.5">{participant.epic_username}</p>
         )}
       </div>
       <div className="mt-1">
@@ -69,7 +69,7 @@ function PlayerCard({
             <CheckCircle2 size={11} /> Reportó
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 text-xs bg-[#1a1a1a] text-[#555] border border-[#222] px-2 py-0.5 rounded-full">
+          <span className="inline-flex items-center gap-1 text-xs bg-[#1e1b4b] text-[#555] border border-[#272454] px-2 py-0.5 rounded-full">
             <Hourglass size={11} /> Pendiente
           </span>
         )}
@@ -180,10 +180,10 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
   }[match.status] ?? match.status
 
   const statusColor = {
-    in_progress: 'text-[#7c3aed] border-[#7c3aed]/30 bg-[#7c3aed]/10',
+    in_progress: 'text-[#8b5cf6] border-[#8b5cf6]/30 bg-[#8b5cf6]/10',
     completed: 'text-green-400 border-green-400/30 bg-green-400/10',
     disputed: 'text-yellow-400 border-yellow-400/30 bg-yellow-400/10',
-    pending: 'text-[#888] border-[#222] bg-[#111]',
+    pending: 'text-[#888] border-[#272454] bg-[#0f0e2a]',
   }[match.status] ?? ''
 
   const winner = match.winner_id === player1.player_id ? player1 : match.winner_id === player2.player_id ? player2 : null
@@ -200,13 +200,13 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
       )}
 
       {/* Header bar */}
-      <div className="flex items-center justify-between bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl px-5 py-4">
+      <div className="flex items-center justify-between bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl px-5 py-4">
         <div>
           <p className="text-[#888] text-xs mb-0.5">{tournament.game_mode}</p>
           <p className="text-white font-black text-lg leading-none">{tournament.title}</p>
         </div>
         <div className="text-right">
-          <div className="text-[#7c3aed] font-black text-2xl leading-none">${tournament.prize_pool}</div>
+          <div className="text-[#8b5cf6] font-black text-2xl leading-none">${tournament.prize_pool}</div>
           <p className="text-[#555] text-xs mt-0.5">MXN premio</p>
         </div>
       </div>
@@ -215,13 +215,13 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
       <div className="grid grid-cols-2 gap-3">
         <div className={`flex items-center gap-2.5 border rounded-xl px-4 py-3 ${statusColor}`}>
           <div className={`w-2 h-2 rounded-full ${
-            match.status === 'in_progress' ? 'bg-[#7c3aed] animate-pulse' :
+            match.status === 'in_progress' ? 'bg-[#8b5cf6] animate-pulse' :
             match.status === 'completed' ? 'bg-green-400' :
             match.status === 'disputed' ? 'bg-yellow-400 animate-pulse' : 'bg-[#555]'
           }`} />
           <span className="font-bold text-sm">{statusLabel}</span>
         </div>
-        <div className="flex items-center gap-2.5 bg-[#0e0e0e] border border-[#1a1a1a] rounded-xl px-4 py-3">
+        <div className="flex items-center gap-2.5 bg-[#0f0e2a] border border-[#1e1b4b] rounded-xl px-4 py-3">
           <Clock size={15} className={elapsed > 1800 ? 'text-yellow-400' : 'text-[#555]'} />
           <span className={`font-mono font-bold text-sm ${elapsed > 1800 ? 'text-yellow-400' : 'text-white'}`}>
             {formatElapsed(elapsed)}
@@ -240,7 +240,7 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
           claimedSelf={p1claimed ? p1claimed === player1.player_id : null}
         />
         <div className="flex items-center justify-center px-1">
-          <span className="text-[#2a2a2a] font-black text-sm">VS</span>
+          <span className="text-[#2d2960] font-black text-sm">VS</span>
         </div>
         <PlayerCard
           participant={player2}
@@ -255,10 +255,10 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
 
       {/* In progress — report result */}
       {match.status === 'in_progress' && isParticipant && !hasReported && (
-        <div className="bg-[#0d0d0d] border border-[#1e1e1e] rounded-2xl p-5 space-y-4">
+        <div className="bg-[#0d0c26] border border-[#201e50] rounded-2xl p-5 space-y-4">
           <div>
             <h3 className="text-white font-bold text-base flex items-center gap-2">
-              <Trophy size={16} className="text-[#7c3aed]" />
+              <Trophy size={16} className="text-[#8b5cf6]" />
               Reportar resultado
             </h3>
             <p className="text-[#888] text-xs mt-1">Sube una captura de pantalla como evidencia y declara el resultado.</p>
@@ -278,7 +278,7 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
                 <img
                   src={preview}
                   alt="Evidencia"
-                  className="w-full rounded-xl border border-[#222] object-cover max-h-52"
+                  className="w-full rounded-xl border border-[#272454] object-cover max-h-52"
                 />
                 <button
                   onClick={() => { setSelectedFile(null); setPreview(null) }}
@@ -290,10 +290,10 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
             ) : (
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-[#2a2a2a] hover:border-[#7c3aed]/50 rounded-xl py-8 flex flex-col items-center gap-2 transition-colors group"
+                className="w-full border-2 border-dashed border-[#2d2960] hover:border-[#8b5cf6]/50 rounded-xl py-8 flex flex-col items-center gap-2 transition-colors group"
               >
-                <div className="w-10 h-10 rounded-full bg-[#1a1a1a] group-hover:bg-[#7c3aed]/10 flex items-center justify-center transition-colors">
-                  <ImageIcon size={18} className="text-[#555] group-hover:text-[#7c3aed] transition-colors" />
+                <div className="w-10 h-10 rounded-full bg-[#1e1b4b] group-hover:bg-[#8b5cf6]/10 flex items-center justify-center transition-colors">
+                  <ImageIcon size={18} className="text-[#555] group-hover:text-[#8b5cf6] transition-colors" />
                 </div>
                 <p className="text-[#888] text-sm group-hover:text-white transition-colors">Toca para subir captura</p>
                 <p className="text-[#444] text-xs">JPG, PNG, WEBP · máx 5 MB</p>
@@ -334,13 +334,13 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
 
       {/* Waiting for opponent */}
       {match.status === 'in_progress' && isParticipant && hasReported && (
-        <div className="bg-[#0d0d0d] border border-[#1e1e1e] rounded-2xl p-6 text-center">
-          <Hourglass size={28} className="text-[#7c3aed] mx-auto mb-3 animate-pulse" />
+        <div className="bg-[#0d0c26] border border-[#201e50] rounded-2xl p-6 text-center">
+          <Hourglass size={28} className="text-[#8b5cf6] mx-auto mb-3 animate-pulse" />
           <h3 className="text-white font-bold mb-1">Resultado enviado</h3>
           <p className="text-[#888] text-sm">Esperando que tu rival reporte su resultado…</p>
           <div className="flex justify-center gap-1.5 mt-4">
             {[0, 1, 2].map(i => (
-              <div key={i} className="w-2 h-2 rounded-full bg-[#7c3aed] animate-bounce" style={{ animationDelay: `${i * 0.2}s` }} />
+              <div key={i} className="w-2 h-2 rounded-full bg-[#8b5cf6] animate-bounce" style={{ animationDelay: `${i * 0.2}s` }} />
             ))}
           </div>
         </div>
@@ -348,7 +348,7 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
 
       {/* Not a participant viewing in_progress */}
       {match.status === 'in_progress' && !isParticipant && (
-        <div className="bg-[#0d0d0d] border border-[#1a1a1a] rounded-xl px-4 py-3 text-center">
+        <div className="bg-[#0d0c26] border border-[#1e1b4b] rounded-xl px-4 py-3 text-center">
           <p className="text-[#888] text-sm">Partida en curso</p>
         </div>
       )}
@@ -373,11 +373,11 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
                 <p className="text-[#888] text-xs truncate">{label}</p>
                 {url ? (
                   <a href={url} target="_blank" rel="noopener noreferrer">
-                    <img src={url} alt="Evidencia" className="w-full rounded-xl border border-[#222] object-cover max-h-32 hover:opacity-80 transition-opacity" />
+                    <img src={url} alt="Evidencia" className="w-full rounded-xl border border-[#272454] object-cover max-h-32 hover:opacity-80 transition-opacity" />
                   </a>
                 ) : (
-                  <div className="w-full h-20 bg-[#111] border border-[#222] rounded-xl flex items-center justify-center">
-                    <ImageIcon size={16} className="text-[#333]" />
+                  <div className="w-full h-20 bg-[#0f0e2a] border border-[#272454] rounded-xl flex items-center justify-center">
+                    <ImageIcon size={16} className="text-[#3a375e]" />
                   </div>
                 )}
               </div>
@@ -388,17 +388,17 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
 
       {/* COMPLETED */}
       {match.status === 'completed' && winner && (
-        <div className="bg-[#0d0d0d] border border-yellow-400/20 rounded-2xl p-5 text-center space-y-2">
+        <div className="bg-[#0d0c26] border border-yellow-400/20 rounded-2xl p-5 text-center space-y-2">
           <Crown size={28} className="text-yellow-400 mx-auto" />
           <p className="text-[#888] text-xs uppercase tracking-widest">Ganador</p>
           <p className="text-white font-black text-2xl">
             {winner.profiles?.display_name || winner.profiles?.username}
           </p>
           {winner.epic_username && (
-            <p className="text-[#7c3aed] font-mono text-sm">{winner.epic_username}</p>
+            <p className="text-[#8b5cf6] font-mono text-sm">{winner.epic_username}</p>
           )}
-          <div className="inline-block bg-[#7c3aed]/10 border border-[#7c3aed]/30 rounded-xl px-4 py-2 mt-2">
-            <p className="text-[#7c3aed] font-black text-xl">${tournament.prize_pool} MXN</p>
+          <div className="inline-block bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 rounded-xl px-4 py-2 mt-2">
+            <p className="text-[#8b5cf6] font-black text-xl">${tournament.prize_pool} MXN</p>
             <p className="text-[#888] text-xs">cobrados automáticamente</p>
           </div>
           {match.admin_note && (

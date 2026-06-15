@@ -68,13 +68,13 @@ export default async function TournamentsPage({
   const currentParams = { format, fee, status }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen bg-[#08071a]">
       <Navbar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
 
         {/* Header */}
         <div className="mb-10">
-          <p className="text-[#7c3aed] text-xs font-bold uppercase tracking-widest mb-1">Competencias</p>
+          <p className="text-[#8b5cf6] text-xs font-bold uppercase tracking-widest mb-1">Competencias</p>
           <h1 className="text-4xl sm:text-5xl font-black text-white leading-none">Torneos 1v1</h1>
           <p className="text-[#888] mt-2 text-sm">
             {openCount ?? 0} torneo{openCount !== 1 ? 's' : ''} abierto{openCount !== 1 ? 's' : ''} ahora mismo
@@ -82,12 +82,12 @@ export default async function TournamentsPage({
         </div>
 
         {/* Filters (server-rendered links, no JS needed) */}
-        <div className="bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl p-4 mb-8 space-y-3">
+        <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-4 mb-8 space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-[#444] text-xs font-medium w-14 flex-shrink-0">Estado</span>
             {STATUS_OPTIONS.map(opt => (
               <a key={opt.value} href={buildHref(currentParams, 'status', opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${status === opt.value ? 'bg-[#7c3aed] text-white' : 'bg-[#111] border border-[#222] text-[#888] hover:text-white hover:border-[#333]'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${status === opt.value ? 'bg-[#8b5cf6] text-white' : 'bg-[#0f0e2a] border border-[#272454] text-[#888] hover:text-white hover:border-[#3a375e]'}`}>
                 {opt.label}
               </a>
             ))}
@@ -96,7 +96,7 @@ export default async function TournamentsPage({
             <span className="text-[#444] text-xs font-medium w-14 flex-shrink-0">Formato</span>
             {FORMAT_OPTIONS.map(opt => (
               <a key={opt.value} href={buildHref(currentParams, 'format', opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${format === opt.value ? 'bg-white/10 text-white border border-white/20' : 'bg-[#111] border border-[#222] text-[#888] hover:text-white hover:border-[#333]'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${format === opt.value ? 'bg-white/10 text-white border border-white/20' : 'bg-[#0f0e2a] border border-[#272454] text-[#888] hover:text-white hover:border-[#3a375e]'}`}>
                 {opt.label}
               </a>
             ))}
@@ -105,7 +105,7 @@ export default async function TournamentsPage({
             <span className="text-[#444] text-xs font-medium w-14 flex-shrink-0">Entrada</span>
             {FEE_OPTIONS.map(opt => (
               <a key={opt.value} href={buildHref(currentParams, 'fee', opt.value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${fee === opt.value ? 'bg-white/10 text-white border border-white/20' : 'bg-[#111] border border-[#222] text-[#888] hover:text-white hover:border-[#333]'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${fee === opt.value ? 'bg-white/10 text-white border border-white/20' : 'bg-[#0f0e2a] border border-[#272454] text-[#888] hover:text-white hover:border-[#3a375e]'}`}>
                 {opt.label}
               </a>
             ))}

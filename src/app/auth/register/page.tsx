@@ -67,7 +67,7 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-[#08071a] flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <div className="w-16 h-16 bg-green-400/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle size={32} className="text-green-400" />
@@ -79,7 +79,7 @@ export default function RegisterPage() {
           </p>
           <Link
             href="/auth/login"
-            className="inline-block bg-[#7c3aed] hover:bg-[#6d28d9] text-white font-bold px-6 py-3 rounded-xl transition-colors"
+            className="inline-block bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold px-6 py-3 rounded-xl transition-colors"
           >
             Ir a iniciar sesión
           </Link>
@@ -89,13 +89,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4 py-12">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#7c3aed]/5 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-[#08071a] flex items-center justify-center px-4 py-12">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#8b5cf6]/5 rounded-full blur-3xl pointer-events-none" />
 
       <div className="relative w-full max-w-md">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 bg-[#7c3aed] rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-[#8b5cf6] rounded-lg flex items-center justify-center">
               <span className="text-white font-black text-lg">R</span>
             </div>
             <span className="text-white font-black text-2xl tracking-wider">RISK</span>
@@ -104,7 +104,7 @@ export default function RegisterPage() {
           <p className="text-[#888] mt-2">Empieza a competir por dinero real</p>
         </div>
 
-        <div className="bg-[#111] border border-[#222] rounded-2xl p-8">
+        <div className="bg-[#0f0e2a] border border-[#272454] rounded-2xl p-8">
           {error && (
             <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 mb-6">
               <AlertCircle size={16} className="text-red-400 flex-shrink-0" />
@@ -127,9 +127,9 @@ export default function RegisterPage() {
           </button>
 
           <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-[#222]" />
+            <div className="flex-1 h-px bg-[#272454]" />
             <span className="text-[#888] text-sm">o</span>
-            <div className="flex-1 h-px bg-[#222]" />
+            <div className="flex-1 h-px bg-[#272454]" />
           </div>
 
           <form onSubmit={handleRegister} className="space-y-4">
@@ -145,7 +145,7 @@ export default function RegisterPage() {
                   placeholder="jugador123"
                   minLength={3}
                   maxLength={20}
-                  className="w-full bg-[#0a0a0f] border border-[#222] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#7c3aed] transition-colors"
+                  className="w-full bg-[#08071a] border border-[#272454] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#8b5cf6] transition-colors"
                 />
               </div>
               <p className="text-[#555] text-xs mt-1">Solo letras, números y guiones bajos</p>
@@ -161,7 +161,7 @@ export default function RegisterPage() {
                   onChange={e => setEmail(e.target.value)}
                   required
                   placeholder="tu@email.com"
-                  className="w-full bg-[#0a0a0f] border border-[#222] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#7c3aed] transition-colors"
+                  className="w-full bg-[#08071a] border border-[#272454] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#8b5cf6] transition-colors"
                 />
               </div>
             </div>
@@ -177,7 +177,7 @@ export default function RegisterPage() {
                   required
                   placeholder="Mínimo 8 caracteres"
                   minLength={8}
-                  className="w-full bg-[#0a0a0f] border border-[#222] rounded-lg pl-10 pr-12 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#7c3aed] transition-colors"
+                  className="w-full bg-[#08071a] border border-[#272454] rounded-lg pl-10 pr-12 py-3 text-white placeholder-[#555] focus:outline-none focus:border-[#8b5cf6] transition-colors"
                 />
                 <button
                   type="button"
@@ -192,7 +192,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors mt-2"
+              className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors mt-2"
             >
               {loading ? 'Creando cuenta...' : 'Crear cuenta gratis'}
             </button>
@@ -208,7 +208,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-[#888] mt-6">
           ¿Ya tienes cuenta?{' '}
-          <Link href="/auth/login" className="text-[#7c3aed] font-semibold hover:underline">
+          <Link href="/auth/login" className="text-[#8b5cf6] font-semibold hover:underline">
             Iniciar sesión
           </Link>
         </p>

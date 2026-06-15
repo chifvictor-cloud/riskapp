@@ -123,9 +123,9 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
         </div>
       )}
 
-      <div className="bg-[#0e0e0e] border border-yellow-400/25 rounded-2xl overflow-hidden">
+      <div className="bg-[#0f0e2a] border border-yellow-400/25 rounded-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-[#1a1a1a] bg-yellow-400/3">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-[#1e1b4b] bg-yellow-400/3">
           <ShieldAlert size={15} className="text-yellow-400 flex-shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-white font-bold text-sm truncate">{match.tournament?.title}</p>
@@ -153,7 +153,7 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
             ].map(({ name, epic, claimed, id, screenshotUrl }) => (
               <div key={id} className="space-y-2">
                 {/* Player info */}
-                <div className="bg-[#111] border border-[#1e1e1e] rounded-xl p-3 space-y-0.5">
+                <div className="bg-[#0f0e2a] border border-[#201e50] rounded-xl p-3 space-y-0.5">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-white font-bold text-sm truncate">{name}</p>
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
@@ -165,7 +165,7 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
                     </span>
                   </div>
                   {epic && (
-                    <p className="text-[#7c3aed] text-xs font-mono">{epic}</p>
+                    <p className="text-[#8b5cf6] text-xs font-mono">{epic}</p>
                   )}
                 </div>
                 {/* Screenshot */}
@@ -177,12 +177,12 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
                     <img
                       src={screenshotUrl}
                       alt="Evidencia"
-                      className="w-full rounded-xl border border-[#222] object-cover h-36 hover:opacity-80 transition-opacity cursor-zoom-in"
+                      className="w-full rounded-xl border border-[#272454] object-cover h-36 hover:opacity-80 transition-opacity cursor-zoom-in"
                     />
                   </button>
                 ) : (
-                  <div className="w-full h-36 bg-[#111] border border-[#1e1e1e] rounded-xl flex flex-col items-center justify-center gap-1.5">
-                    <ImageIcon size={18} className="text-[#333]" />
+                  <div className="w-full h-36 bg-[#0f0e2a] border border-[#201e50] rounded-xl flex flex-col items-center justify-center gap-1.5">
+                    <ImageIcon size={18} className="text-[#3a375e]" />
                     <p className="text-[#444] text-xs">Sin captura</p>
                   </div>
                 )}
@@ -204,7 +204,7 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
             value={note}
             onChange={e => setNote(e.target.value)}
             placeholder="Nota para ambos jugadores (opcional)"
-            className="w-full bg-[#111] border border-[#222] focus:border-[#7c3aed] rounded-xl px-4 py-2.5 text-white placeholder-[#444] outline-none text-sm transition-colors"
+            className="w-full bg-[#0f0e2a] border border-[#272454] focus:border-[#8b5cf6] rounded-xl px-4 py-2.5 text-white placeholder-[#444] outline-none text-sm transition-colors"
           />
 
           {/* Resolve */}
@@ -214,7 +214,7 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
               <button
                 onClick={() => resolve(match.player1_id)}
                 disabled={isPending}
-                className="flex items-center justify-center gap-2 bg-[#7c3aed]/10 hover:bg-[#7c3aed]/18 disabled:opacity-40 border border-[#7c3aed]/35 text-[#7c3aed] font-bold py-3.5 rounded-xl transition-all text-sm"
+                className="flex items-center justify-center gap-2 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/18 disabled:opacity-40 border border-[#8b5cf6]/35 text-[#8b5cf6] font-bold py-3.5 rounded-xl transition-all text-sm"
               >
                 <Crown size={14} />
                 {isPending ? 'Procesando…' : `${p1Name} ganó`}
@@ -222,7 +222,7 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
               <button
                 onClick={() => resolve(match.player2_id)}
                 disabled={isPending}
-                className="flex items-center justify-center gap-2 bg-[#7c3aed]/10 hover:bg-[#7c3aed]/18 disabled:opacity-40 border border-[#7c3aed]/35 text-[#7c3aed] font-bold py-3.5 rounded-xl transition-all text-sm"
+                className="flex items-center justify-center gap-2 bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/18 disabled:opacity-40 border border-[#8b5cf6]/35 text-[#8b5cf6] font-bold py-3.5 rounded-xl transition-all text-sm"
               >
                 <Crown size={14} />
                 {isPending ? 'Procesando…' : `${p2Name} ganó`}
@@ -333,14 +333,14 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
     <div className="space-y-6">
       {/* Live indicator + tabs */}
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 bg-[#0e0e0e] border border-[#1a1a1a] rounded-xl p-1">
+        <div className="flex gap-1 bg-[#0f0e2a] border border-[#1e1b4b] rounded-xl p-1">
           {TABS.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`relative flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
                 tab === t.id
-                  ? 'bg-[#7c3aed] text-white shadow-[0_0_16px_rgba(124,58,237,0.25)]'
+                  ? 'bg-[#8b5cf6] text-white shadow-[0_0_16px_rgba(139,92,246,0.25)]'
                   : 'text-[#666] hover:text-white'
               }`}
             >
@@ -370,47 +370,47 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                 label: 'Torneos hoy',
                 value: stats.tournamentsToday,
                 sub: 'creados este día',
-                icon: <Swords size={17} className="text-[#7c3aed]" />,
+                icon: <Swords size={17} className="text-[#8b5cf6]" />,
               },
               {
                 label: 'Ingresos hoy',
                 value: `$${stats.revenueToday.toFixed(0)}`,
                 sub: 'MXN (10% del prize pool)',
-                icon: <TrendingUp size={17} className="text-[#7c3aed]" />,
+                icon: <TrendingUp size={17} className="text-[#8b5cf6]" />,
                 accent: true,
               },
               {
                 label: 'Disputas activas',
                 value: stats.disputesCount,
                 sub: disputes.length === 0 ? 'Sin conflictos' : 'requieren revisión',
-                icon: <ShieldAlert size={17} className={stats.disputesCount > 0 ? 'text-yellow-400' : 'text-[#7c3aed]'} />,
+                icon: <ShieldAlert size={17} className={stats.disputesCount > 0 ? 'text-yellow-400' : 'text-[#8b5cf6]'} />,
                 warn: stats.disputesCount > 0,
               },
               {
                 label: 'Usuarios registrados',
                 value: stats.totalUsers,
                 sub: 'en la plataforma',
-                icon: <Users size={17} className="text-[#7c3aed]" />,
+                icon: <Users size={17} className="text-[#8b5cf6]" />,
               },
             ].map((s, i) => (
               <div
                 key={i}
-                className={`bg-[#0e0e0e] border rounded-2xl p-5 ${
-                  s.accent ? 'border-[#7c3aed]/25' :
+                className={`bg-[#0f0e2a] border rounded-2xl p-5 ${
+                  s.accent ? 'border-[#8b5cf6]/25' :
                   s.warn ? 'border-yellow-400/25' :
-                  'border-[#1a1a1a]'
+                  'border-[#1e1b4b]'
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-[#555] text-xs font-medium">{s.label}</span>
                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-                    s.warn ? 'bg-yellow-400/10' : 'bg-[#7c3aed]/10'
+                    s.warn ? 'bg-yellow-400/10' : 'bg-[#8b5cf6]/10'
                   }`}>
                     {s.icon}
                   </div>
                 </div>
                 <div className={`font-black text-2xl leading-none mb-1 ${
-                  s.accent ? 'text-[#7c3aed]' :
+                  s.accent ? 'text-[#8b5cf6]' :
                   s.warn ? 'text-yellow-400' :
                   'text-white'
                 }`}>{s.value}</div>
@@ -421,7 +421,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
 
           {/* Quick status */}
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl p-5">
+            <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-5">
               <h3 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
                 <ShieldAlert size={14} className="text-yellow-400" />
                 Disputas recientes
@@ -437,18 +437,18 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                     <button
                       key={d.id}
                       onClick={() => setTab('disputes')}
-                      className="w-full flex items-center gap-3 text-left hover:bg-[#111] rounded-xl px-3 py-2 transition-colors"
+                      className="w-full flex items-center gap-3 text-left hover:bg-[#0f0e2a] rounded-xl px-3 py-2 transition-colors"
                     >
                       <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-white text-xs font-semibold truncate">{d.tournament?.title}</p>
                         <p className="text-[#555] text-[10px]">{elapsed(d.created_at)} · ${d.tournament?.prize_pool} MXN</p>
                       </div>
-                      <ChevronRight size={13} className="text-[#333]" />
+                      <ChevronRight size={13} className="text-[#3a375e]" />
                     </button>
                   ))}
                   {disputes.length > 3 && (
-                    <button onClick={() => setTab('disputes')} className="text-[#7c3aed] text-xs hover:underline mt-1">
+                    <button onClick={() => setTab('disputes')} className="text-[#8b5cf6] text-xs hover:underline mt-1">
                       +{disputes.length - 3} más →
                     </button>
                   )}
@@ -456,9 +456,9 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
               )}
             </div>
 
-            <div className="bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl p-5">
+            <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-5">
               <h3 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
-                <Swords size={14} className="text-[#7c3aed]" />
+                <Swords size={14} className="text-[#8b5cf6]" />
                 Partidas activas
               </h3>
               {activeMatches.length === 0 ? (
@@ -470,20 +470,20 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                     const p2r = !!m.player2_claimed_winner
                     return (
                       <a key={m.id} href={`/match/${m.id}`} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-3 hover:bg-[#111] rounded-xl px-3 py-2 transition-colors">
-                        <div className="w-2 h-2 rounded-full bg-[#7c3aed] animate-pulse flex-shrink-0" />
+                        className="flex items-center gap-3 hover:bg-[#0f0e2a] rounded-xl px-3 py-2 transition-colors">
+                        <div className="w-2 h-2 rounded-full bg-[#8b5cf6] animate-pulse flex-shrink-0" />
                         <div className="flex-1 min-w-0">
                           <p className="text-white text-xs font-semibold truncate">{m.tournament?.title}</p>
                           <p className="text-[#555] text-[10px]">
                             {p1r && p2r ? 'Ambos reportaron' : p1r || p2r ? 'Uno reportó' : 'Sin reporte'} · {elapsed(m.created_at)}
                           </p>
                         </div>
-                        <ChevronRight size={13} className="text-[#333]" />
+                        <ChevronRight size={13} className="text-[#3a375e]" />
                       </a>
                     )
                   })}
                   {activeMatches.length > 3 && (
-                    <button onClick={() => setTab('matches')} className="text-[#7c3aed] text-xs hover:underline mt-1">
+                    <button onClick={() => setTab('matches')} className="text-[#8b5cf6] text-xs hover:underline mt-1">
                       +{activeMatches.length - 3} más →
                     </button>
                   )}
@@ -498,7 +498,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
       {tab === 'disputes' && (
         <div className="space-y-4">
           {disputes.length === 0 ? (
-            <div className="bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl p-10 text-center">
+            <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-10 text-center">
               <div className="w-14 h-14 bg-green-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Check size={24} className="text-green-400" />
               </div>
@@ -521,22 +521,22 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
       {tab === 'matches' && (
         <div>
           {activeMatches.length === 0 ? (
-            <div className="bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl p-10 text-center">
-              <Swords size={28} className="text-[#333] mx-auto mb-3" />
+            <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-10 text-center">
+              <Swords size={28} className="text-[#3a375e] mx-auto mb-3" />
               <p className="text-white font-bold">No hay partidas en curso</p>
               <p className="text-[#888] text-sm mt-1">Las partidas activas aparecerán aquí en tiempo real.</p>
             </div>
           ) : (
-            <div className="bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl overflow-hidden">
+            <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl overflow-hidden">
               {/* Table header */}
-              <div className="grid grid-cols-[1fr_1fr_80px_80px_100px] gap-4 px-5 py-3 border-b border-[#1a1a1a] text-[#555] text-xs font-medium">
+              <div className="grid grid-cols-[1fr_1fr_80px_80px_100px] gap-4 px-5 py-3 border-b border-[#1e1b4b] text-[#555] text-xs font-medium">
                 <span>Torneo</span>
                 <span>Jugadores</span>
                 <span>Premio</span>
                 <span>Tiempo</span>
                 <span>Reportes</span>
               </div>
-              <div className="divide-y divide-[#111]">
+              <div className="divide-y divide-[#0f0e2a]">
                 {activeMatches.map(m => {
                   const p1r = !!m.player1_claimed_winner
                   const p2r = !!m.player2_claimed_winner
@@ -545,7 +545,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                   const elapsedSec = Math.floor((Date.now() - new Date(m.created_at).getTime()) / 1000 / 60)
                   const isLate = elapsedSec > 30
                   return (
-                    <div key={m.id} className={`grid grid-cols-[1fr_1fr_80px_80px_100px] gap-4 px-5 py-4 items-center hover:bg-[#111] transition-colors ${isLate ? 'bg-yellow-400/2' : ''}`}>
+                    <div key={m.id} className={`grid grid-cols-[1fr_1fr_80px_80px_100px] gap-4 px-5 py-4 items-center hover:bg-[#0f0e2a] transition-colors ${isLate ? 'bg-yellow-400/2' : ''}`}>
                       <div className="min-w-0">
                         <p className="text-white text-sm font-semibold truncate">{m.tournament?.title}</p>
                         <p className="text-[#555] text-xs">{m.tournament?.game_mode}</p>
@@ -555,7 +555,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                         <p className="text-[#555] text-xs truncate">vs {p2n}</p>
                       </div>
                       <div>
-                        <p className="text-[#7c3aed] font-bold text-sm">${m.tournament?.prize_pool}</p>
+                        <p className="text-[#8b5cf6] font-bold text-sm">${m.tournament?.prize_pool}</p>
                         <p className="text-[#555] text-[10px]">MXN</p>
                       </div>
                       <div>
@@ -567,16 +567,16 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                       <div className="flex items-center gap-2">
                         <div className="flex gap-1">
                           <span title={`${p1n}: ${p1r ? 'reportó' : 'pendiente'}`}
-                            className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${p1r ? 'bg-green-500/20 text-green-400' : 'bg-[#1a1a1a] text-[#555]'}`}>
+                            className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${p1r ? 'bg-green-500/20 text-green-400' : 'bg-[#1e1b4b] text-[#555]'}`}>
                             {p1r ? <Check size={10} /> : '1'}
                           </span>
                           <span title={`${p2n}: ${p2r ? 'reportó' : 'pendiente'}`}
-                            className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${p2r ? 'bg-green-500/20 text-green-400' : 'bg-[#1a1a1a] text-[#555]'}`}>
+                            className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${p2r ? 'bg-green-500/20 text-green-400' : 'bg-[#1e1b4b] text-[#555]'}`}>
                             {p2r ? <Check size={10} /> : '2'}
                           </span>
                         </div>
                         <a href={`/match/${m.id}`} target="_blank" rel="noopener noreferrer"
-                          className="text-[#7c3aed] hover:underline text-xs flex-shrink-0">Ver →</a>
+                          className="text-[#8b5cf6] hover:underline text-xs flex-shrink-0">Ver →</a>
                       </div>
                     </div>
                   )
@@ -589,25 +589,25 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
 
       {/* ── USERS TAB ── */}
       {tab === 'users' && (
-        <div className="bg-[#0e0e0e] border border-[#1a1a1a] rounded-2xl overflow-hidden">
+        <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl overflow-hidden">
           {/* Header */}
-          <div className="grid grid-cols-[1fr_100px_80px_80px_70px] gap-4 px-5 py-3 border-b border-[#1a1a1a] text-[#555] text-xs font-medium">
+          <div className="grid grid-cols-[1fr_100px_80px_80px_70px] gap-4 px-5 py-3 border-b border-[#1e1b4b] text-[#555] text-xs font-medium">
             <span>Usuario</span>
             <span>Balance</span>
             <span>Victorias</span>
             <span>Derrotas</span>
             <span>Rol</span>
           </div>
-          <div className="divide-y divide-[#111]">
+          <div className="divide-y divide-[#0f0e2a]">
             {users.map(u => {
               const name = u.display_name || u.username
               const totalGames = u.wins + u.losses
               const wr = totalGames > 0 ? Math.round((u.wins / totalGames) * 100) : 0
               return (
-                <div key={u.id} className={`grid grid-cols-[1fr_100px_80px_80px_70px] gap-4 px-5 py-3.5 items-center hover:bg-[#111] transition-colors ${u.is_admin ? 'bg-[#7c3aed]/2' : ''}`}>
+                <div key={u.id} className={`grid grid-cols-[1fr_100px_80px_80px_70px] gap-4 px-5 py-3.5 items-center hover:bg-[#0f0e2a] transition-colors ${u.is_admin ? 'bg-[#8b5cf6]/2' : ''}`}>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs flex-shrink-0 ${u.is_admin ? 'bg-[#7c3aed]' : 'bg-[#2a2a2a]'}`}>
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-black text-xs flex-shrink-0 ${u.is_admin ? 'bg-[#8b5cf6]' : 'bg-[#2d2960]'}`}>
                         {name[0].toUpperCase()}
                       </div>
                       <div className="min-w-0">
@@ -617,7 +617,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                     </div>
                   </div>
                   <div>
-                    <p className={`text-sm font-bold ${u.balance > 0 ? 'text-[#7c3aed]' : 'text-[#555]'}`}>
+                    <p className={`text-sm font-bold ${u.balance > 0 ? 'text-[#8b5cf6]' : 'text-[#555]'}`}>
                       ${u.balance.toFixed(0)}
                     </p>
                     <p className="text-[#555] text-[10px]">MXN</p>
@@ -631,7 +631,7 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                   </div>
                   <div>
                     {u.is_admin ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#7c3aed] bg-[#7c3aed]/10 border border-[#7c3aed]/20 px-2 py-0.5 rounded-full">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#8b5cf6] bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 px-2 py-0.5 rounded-full">
                         <BadgeCheck size={10} /> Admin
                       </span>
                     ) : (
