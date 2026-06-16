@@ -81,7 +81,7 @@ export async function createTournament(
 
   // Post-creation: apply creator options if provided
   if (creatorOptions?.isCreator && tournamentId) {
-    await supabase.from('tournaments').update({
+    await (supabase as any).from('tournaments').update({
       is_creator: true,
       stream_url: creatorOptions.streamUrl?.trim() || null,
       chat_pot_enabled: creatorOptions.chatPotEnabled ?? false,

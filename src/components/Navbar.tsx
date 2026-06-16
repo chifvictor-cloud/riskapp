@@ -59,7 +59,7 @@ export default function Navbar() {
             <Link href="/tournaments" className="text-[#888] hover:text-white transition-colors text-sm font-medium">
               Torneos
             </Link>
-            <Link href="/leaderboard" className="text-[#888] hover:text-white transition-colors text-sm font-medium">
+            <Link href="/ranking" className="text-[#888] hover:text-white transition-colors text-sm font-medium">
               Ranking
             </Link>
             {user && (
@@ -129,7 +129,7 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden bg-[#0f0e2a] border-t border-[#272454] px-4 py-4 space-y-3">
           <Link href="/tournaments" className="block text-[#888] hover:text-white py-2">Torneos</Link>
-          <Link href="/leaderboard" className="block text-[#888] hover:text-white py-2">Ranking</Link>
+          <Link href="/ranking" className="block text-[#888] hover:text-white py-2">Ranking</Link>
           {user ? (
             <>
               <Link href="/dashboard" className="block text-[#888] hover:text-white py-2">Dashboard</Link>
