@@ -35,7 +35,11 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Error al crear transacción' }, { status: 500 })
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL!
+  const appUrl = 'https://riskapp-seven.vercel.app'
+  const webhookUrl = `${appUrl}/api/payments/webhook`
+
+  console.log('[create] notification_url:', webhookUrl)
+  console.log('[create] external_reference:', `${user.id}::${tx.id}`)
 
   const preference = new Preference(mp)
   const result = await preference.create({
@@ -55,11 +59,13 @@ export async function POST(request: Request) {
         pending: `${appUrl}/deposit/pending`,
       },
       auto_return: 'approved',
-      notification_url: `${appUrl}/api/payments/webhook`,
+      notification_url: webhookUrl,
       external_reference: `${user.id}::${tx.id}`,
       statement_descriptor: 'RISK PLATFORM',
     },
   })
+
+  console.log('[create] preference id:', result.id, '| init_point set:', !!result.init_point)
 
   // Store MP preference ID for traceability
   await admin
