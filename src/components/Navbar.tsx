@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Trophy, Wallet, LogOut, Menu, X, ShoppingBag } from 'lucide-react'
+import { Wallet, LogOut, Menu, X, ShoppingBag, Plus } from 'lucide-react'
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
@@ -79,9 +79,18 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                <div className="flex items-center gap-2 bg-[#0f0e2a] border border-[#272454] rounded-lg px-3 py-1.5">
-                  <Wallet size={14} className="text-[#8b5cf6]" />
-                  <span className="text-white font-semibold text-sm">${balance.toFixed(2)}</span>
+                <div className="flex items-center gap-1 bg-[#0f0e2a] border border-[#272454] rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-2 px-3 py-1.5">
+                    <Wallet size={14} className="text-[#8b5cf6]" />
+                    <span className="text-white font-semibold text-sm">${balance.toFixed(2)}</span>
+                  </div>
+                  <Link
+                    href="/deposit"
+                    className="flex items-center gap-1 bg-[#8b5cf6] hover:bg-[#7c3aed] px-2.5 py-1.5 transition-colors"
+                    title="Depositar"
+                  >
+                    <Plus size={14} className="text-white" />
+                  </Link>
                 </div>
                 <Link
                   href="/profile"
@@ -134,6 +143,7 @@ export default function Navbar() {
             <>
               <Link href="/dashboard" className="block text-[#888] hover:text-white py-2">Dashboard</Link>
               <Link href="/store" className="block text-[#888] hover:text-white py-2">Tienda</Link>
+              <Link href="/deposit" className="block text-[#8b5cf6] font-semibold py-2">+ Depositar</Link>
               <Link href="/profile" className="block text-[#888] hover:text-white py-2">Perfil</Link>
               <button onClick={handleSignOut} className="block text-red-400 py-2 w-full text-left">
                 Cerrar sesión
