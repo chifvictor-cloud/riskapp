@@ -17,6 +17,8 @@ export type VerifyDebug = {
   step: string
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 export async function verifyAndCredit(
   paymentId: string,
   userId: string,
@@ -64,9 +66,28 @@ export async function verifyAndCredit(
       return { ok: false, reason: 'invalid_amount_or_tx', debug }
     }
 
-    debug.step = 'checking_tx'
+    if (!UUID_RE.test(transactionId)) {
+      debug.step = `invalid_tx_uuid: ${transactionId}`
+      return { ok: false, reason: 'invalid_tx_uuid', debug }
+    }
+
     const admin = createAdminClient() as any
 
+    // Idempotency: if this MP payment was already credited, don't double-credit
+    debug.step = 'checking_idempotency'
+    const { data: existingTx } = await admin
+      .from('transactions')
+      .select('status')
+      .eq('mp_payment_id', paymentId)
+      .maybeSingle()
+
+    if (existingTx?.status === 'completed') {
+      debug.txStatus = 'completed'
+      debug.step = 'already_completed'
+      return { ok: true, credited: false, amount, debug }
+    }
+
+    debug.step = 'checking_tx'
     const { data: tx, error: txSelectError } = await admin
       .from('transactions')
       .select('status')
@@ -89,7 +110,7 @@ export async function verifyAndCredit(
     debug.step = 'updating_tx'
     const { error: txError } = await admin
       .from('transactions')
-      .update({ status: 'completed', reference_id: String(paymentId) })
+      .update({ status: 'completed', mp_payment_id: paymentId })
       .eq('id', transactionId)
       .eq('status', 'pending')
 

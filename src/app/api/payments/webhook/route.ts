@@ -76,9 +76,26 @@ export async function POST(request: Request) {
       return Response.json({ ok: true })
     }
 
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!UUID_RE.test(transactionId)) {
+      console.log('[webhook] transactionId is not a UUID:', transactionId)
+      return Response.json({ ok: true })
+    }
+
     const admin = createAdminClient() as any
 
-    // Idempotency check — skip if already credited
+    // Idempotency check — skip if this MP payment was already credited
+    const { data: existingTx } = await admin
+      .from('transactions')
+      .select('status')
+      .eq('mp_payment_id', paymentId)
+      .maybeSingle()
+
+    if (existingTx?.status === 'completed') {
+      console.log('[webhook] already processed (mp_payment_id match), skipping')
+      return Response.json({ ok: true })
+    }
+
     const { data: tx, error: txSelectError } = await admin
       .from('transactions')
       .select('status')
@@ -98,7 +115,7 @@ export async function POST(request: Request) {
     // Mark transaction completed — the double .eq() prevents race conditions
     const { error: txError } = await admin
       .from('transactions')
-      .update({ status: 'completed', reference_id: String(paymentId) })
+      .update({ status: 'completed', mp_payment_id: paymentId })
       .eq('id', transactionId)
       .eq('status', 'pending')
 
