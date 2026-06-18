@@ -78,24 +78,6 @@ export default async function DepositSuccessPage({
           </Link>
         </div>
 
-        {/* DEBUG PANEL — remove once balance crediting works */}
-        <div className="text-left border border-[#ff6b35]/30 rounded-xl bg-[#ff6b35]/5 p-4 text-xs font-mono">
-          <p className="text-[#ff6b35] font-bold mb-3 uppercase tracking-wide">Debug — quitar cuando funcione</p>
-
-          <p className="text-[#888] mb-1">Query params de MP:</p>
-          <pre className="text-[#ccc] mb-4 whitespace-pre-wrap break-all">
-            {JSON.stringify(sp, null, 2)}
-          </pre>
-
-          <p className="text-[#888] mb-1">payment_id extraído: <span className="text-white">{paymentId ?? 'NINGUNO'}</span></p>
-          <p className="text-[#888] mb-4">userId autenticado: <span className="text-white">{userId ?? 'NO AUTENTICADO'}</span></p>
-
-          <p className="text-[#888] mb-1">Resultado de verifyAndCredit:</p>
-          <pre className="text-[#ccc] whitespace-pre-wrap break-all">
-            {creditResult ? JSON.stringify(creditResult, null, 2) : 'no se llamó (falta payment_id o usuario)'}
-          </pre>
-        </div>
-
       </main>
     </div>
   )
