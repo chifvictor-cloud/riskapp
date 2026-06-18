@@ -5,8 +5,11 @@ import Link from 'next/link'
 import {
   Wallet, Trophy, Target, Star, Swords, TrendingUp,
   Gamepad2, Calendar, ChevronRight, Crown,
+  ArrowDownLeft, ArrowUpRight,
 } from 'lucide-react'
 import type { Database } from '@/types/database'
+
+type Transaction = Database['public']['Tables']['transactions']['Row']
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
@@ -19,6 +22,7 @@ export default async function ProfilePage() {
   const [
     { data: profileRaw },
     { data: matchesRaw },
+    { data: txsRaw },
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -37,12 +41,21 @@ export default async function ProfilePage() {
       .or(`player1_id.eq.${user.id},player2_id.eq.${user.id}`)
       .order('created_at', { ascending: false })
       .limit(10),
+
+    supabase
+      .from('transactions')
+      .select('id, type, amount, status, description, recipient, created_at')
+      .eq('user_id', user.id)
+      .in('type', ['deposit', 'withdrawal', 'prize'])
+      .order('created_at', { ascending: false })
+      .limit(15) as unknown as Promise<{ data: Transaction[] | null }>,
   ])
 
   const profile = profileRaw as Profile | null
   if (!profile) redirect('/auth/login')
 
   const matches = (matchesRaw ?? []) as any[]
+  const txs = (txsRaw ?? []) as Transaction[]
   const totalMatches = profile.wins + profile.losses
   const winRate = totalMatches > 0 ? Math.round((profile.wins / totalMatches) * 100) : 0
   const displayName = profile.display_name || profile.username
@@ -247,6 +260,101 @@ export default async function ProfilePage() {
 
                     <ChevronRight size={14} className="text-[#2d2960] group-hover:text-[#555] transition-colors flex-shrink-0" />
                   </Link>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Transaction history */}
+        <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl overflow-hidden mt-6">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#1e1b4b]">
+            <h2 className="text-white font-bold flex items-center gap-2">
+              <Wallet size={15} className="text-[#8b5cf6]" />
+              Movimientos
+            </h2>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/withdraw"
+                className="inline-flex items-center gap-1 text-[#8b5cf6] hover:text-white bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20 border border-[#8b5cf6]/20 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <ArrowUpRight size={12} />
+                Retirar
+              </Link>
+              <Link
+                href="/deposit"
+                className="inline-flex items-center gap-1 text-[#009ee3] hover:text-white bg-[#009ee3]/10 hover:bg-[#009ee3]/20 border border-[#009ee3]/20 text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <ArrowDownLeft size={12} />
+                Depositar
+              </Link>
+            </div>
+          </div>
+
+          {txs.length === 0 ? (
+            <div className="py-12 text-center">
+              <div className="w-12 h-12 bg-[#0f0e2a] border border-[#201e50] rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <Wallet size={18} className="text-[#2d2960]" />
+              </div>
+              <p className="text-white font-bold text-sm mb-1">Sin movimientos</p>
+              <p className="text-[#555] text-xs">Tus depósitos y retiros aparecerán aquí</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-[#0a091f]">
+              {txs.map((tx) => {
+                const isDeposit = tx.type === 'deposit' || tx.type === 'prize'
+                const isWithdrawal = tx.type === 'withdrawal'
+                const isPending = tx.status === 'pending'
+                const isFailed = tx.status === 'failed'
+
+                const date = new Date(tx.created_at).toLocaleDateString('es-MX', {
+                  day: 'numeric', month: 'short', year: 'numeric',
+                })
+
+                const typeLabel =
+                  tx.type === 'deposit' ? 'Depósito' :
+                  tx.type === 'withdrawal' ? 'Retiro' :
+                  tx.type === 'prize' ? 'Premio' : tx.type
+
+                return (
+                  <div key={tx.id} className="flex items-center gap-4 px-5 py-3.5">
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      isWithdrawal
+                        ? 'bg-[#8b5cf6]/10'
+                        : 'bg-green-500/10'
+                    }`}>
+                      {isWithdrawal
+                        ? <ArrowUpRight size={14} className="text-[#8b5cf6]" />
+                        : <ArrowDownLeft size={14} className="text-green-400" />
+                      }
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-semibold">{typeLabel}</p>
+                      <p className="text-[#555] text-xs mt-0.5 truncate">
+                        {isWithdrawal && tx.recipient
+                          ? `→ ${tx.recipient}`
+                          : tx.description ?? date
+                        }
+                      </p>
+                    </div>
+
+                    <div className="text-right flex-shrink-0">
+                      <p className={`text-sm font-bold ${
+                        isFailed ? 'text-[#555] line-through' :
+                        isWithdrawal ? 'text-[#8b5cf6]' : 'text-green-400'
+                      }`}>
+                        {isWithdrawal ? '-' : '+'}{tx.amount.toFixed(2)} MXN
+                      </p>
+                      <p className={`text-[10px] mt-0.5 ${
+                        isFailed ? 'text-red-400' :
+                        isPending ? 'text-yellow-400' :
+                        'text-[#3a375e]'
+                      }`}>
+                        {isFailed ? 'Fallido' : isPending ? 'Pendiente' : date}
+                      </p>
+                    </div>
+                  </div>
                 )
               })}
             </div>

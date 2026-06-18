@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
-import { Wallet, LogOut, Menu, X, ShoppingBag, Plus } from 'lucide-react'
+import { Wallet, LogOut, Menu, X, ShoppingBag, Plus, Minus } from 'lucide-react'
 
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
@@ -91,6 +91,13 @@ export default function Navbar() {
                   >
                     <Plus size={14} className="text-white" />
                   </Link>
+                  <Link
+                    href="/withdraw"
+                    className="flex items-center gap-1 bg-[#1a1830] hover:bg-[#252048] border-l border-[#272454] px-2.5 py-1.5 transition-colors"
+                    title="Retirar"
+                  >
+                    <Minus size={14} className="text-[#8b5cf6]" />
+                  </Link>
                 </div>
                 <Link
                   href="/profile"
@@ -144,6 +151,7 @@ export default function Navbar() {
               <Link href="/dashboard" className="block text-[#888] hover:text-white py-2">Dashboard</Link>
               <Link href="/store" className="block text-[#888] hover:text-white py-2">Tienda</Link>
               <Link href="/deposit" className="block text-[#8b5cf6] font-semibold py-2">+ Depositar</Link>
+              <Link href="/withdraw" className="block text-[#888] hover:text-white py-2">Retirar</Link>
               <Link href="/profile" className="block text-[#888] hover:text-white py-2">Perfil</Link>
               <button onClick={handleSignOut} className="block text-red-400 py-2 w-full text-left">
                 Cerrar sesión

@@ -206,6 +206,7 @@ export type Database = {
           status: 'pending' | 'completed' | 'failed' | 'cancelled'
           reference_id: string | null
           description: string | null
+          recipient: string | null
           created_at: string
         }
         Insert: {
@@ -216,10 +217,13 @@ export type Database = {
           status?: 'pending' | 'completed' | 'failed' | 'cancelled'
           reference_id?: string | null
           description?: string | null
+          recipient?: string | null
           created_at?: string
         }
         Update: {
           status?: 'pending' | 'completed' | 'failed' | 'cancelled'
+          reference_id?: string | null
+          recipient?: string | null
         }
       }
       spectator_sessions: {
