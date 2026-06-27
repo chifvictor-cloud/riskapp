@@ -57,16 +57,16 @@ export default function WithdrawClient({ balance }: { balance: number }) {
     return (
       <div className="max-w-md mx-auto">
         <div className="bg-[#0f0e2a] border border-[#8b5cf6]/20 rounded-2xl p-8 text-center">
-          <div className="w-16 h-16 bg-green-500/10 border border-green-500/20 rounded-full flex items-center justify-center mx-auto mb-5">
-            <CheckCircle2 size={32} className="text-green-400" />
+          <div className="w-16 h-16 bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 rounded-full flex items-center justify-center mx-auto mb-5">
+            <CheckCircle2 size={32} className="text-[#8b5cf6]" />
           </div>
-          <h2 className="text-white font-black text-2xl mb-2">¡Retiro exitoso!</h2>
-          <p className="text-[#888] text-sm mb-6">La transferencia fue procesada correctamente</p>
+          <h2 className="text-white font-black text-2xl mb-2">¡Solicitud enviada!</h2>
+          <p className="text-[#888] text-sm mb-6">Tu retiro fue recibido y está en revisión. El admin procesará el pago en las próximas horas.</p>
 
           <div className="bg-[#08071a] border border-[#1e1b4b] rounded-xl p-4 mb-6 space-y-3 text-left">
             <div className="flex justify-between text-sm">
-              <span className="text-[#888]">Monto transferido</span>
-              <span className="text-green-400 font-black">${success.amount.toFixed(2)} MXN</span>
+              <span className="text-[#888]">Monto solicitado</span>
+              <span className="text-[#8b5cf6] font-black">${success.amount.toFixed(2)} MXN</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#888]">Cuenta MercadoPago</span>
@@ -74,7 +74,7 @@ export default function WithdrawClient({ balance }: { balance: number }) {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-[#888]">Estado</span>
-              <span className="text-green-400 font-bold">Completado</span>
+              <span className="text-yellow-400 font-bold">En revisión</span>
             </div>
           </div>
 
@@ -206,7 +206,7 @@ export default function WithdrawClient({ balance }: { balance: number }) {
       </button>
 
       <p className="text-center text-[#333] text-xs mt-4">
-        Las transferencias se acreditan de forma inmediata en tu cuenta MercadoPago
+        Las transferencias son procesadas manualmente por el administrador
       </p>
     </div>
   )

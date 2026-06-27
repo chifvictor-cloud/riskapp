@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -19,8 +18,8 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Ingresa un email de MercadoPago válido' }, { status: 400 })
   }
 
-  // Atomic: verify balance, deduct, create pending tx — single DB transaction
-  const { data: txId, error: rpcError } = await (supabase as any).rpc('process_withdrawal', {
+  // Deduct balance + create pending withdrawal in one atomic DB transaction
+  const { error: rpcError } = await (supabase as any).rpc('process_withdrawal', {
     p_amount: amount,
     p_recipient: recipient,
   })
@@ -33,48 +32,5 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Error al procesar el retiro' }, { status: 500 })
   }
 
-  const admin = createAdminClient() as any
-
-  try {
-    const transferRes = await fetch('https://api.mercadopago.com/v1/account/transfer', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.MP_ACCESS_TOKEN}`,
-        'Content-Type': 'application/json',
-        'X-Idempotency-Key': String(txId),
-      },
-      body: JSON.stringify({
-        amount,
-        currency_id: 'MXN',
-        receiver: { email: recipient },
-      }),
-    })
-
-    const transferData = await transferRes.json()
-    console.log('[withdraw] MP response:', transferRes.status, JSON.stringify(transferData))
-
-    if (!transferRes.ok) {
-      await admin.rpc('refund_withdrawal', { p_tx_id: txId, p_user_id: user.id, p_amount: amount })
-      const mpMessage = transferData?.message ?? transferData?.error ?? 'Error de MercadoPago'
-      return Response.json(
-        { error: `No se pudo completar la transferencia: ${mpMessage}` },
-        { status: 400 },
-      )
-    }
-
-    await admin
-      .from('transactions')
-      .update({ status: 'completed', reference_id: String(transferData.id ?? '') })
-      .eq('id', txId)
-
-    return Response.json({ ok: true, amount, recipient })
-
-  } catch (err: any) {
-    console.error('[withdraw] unexpected error:', err)
-    await admin.rpc('refund_withdrawal', { p_tx_id: txId, p_user_id: user.id, p_amount: amount })
-    return Response.json(
-      { error: 'Error de conexión con MercadoPago. Tu balance ha sido reembolsado.' },
-      { status: 500 },
-    )
-  }
+  return Response.json({ ok: true, amount, recipient })
 }

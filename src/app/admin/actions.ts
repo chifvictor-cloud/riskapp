@@ -27,3 +27,19 @@ export async function resolveDispute(matchId: string, winnerId: string, note: st
   revalidatePath('/dashboard')
   return { success: true as const, winnerId: data?.winner_id as string, prize: data?.prize as number }
 }
+
+export async function completeWithdrawal(txId: string) {
+  const supabase = await createClient()
+  const { error } = await (supabase as any).rpc('admin_complete_withdrawal', { p_tx_id: txId })
+  if (error) return { error: error.message as string }
+  revalidatePath('/admin')
+  return { success: true as const }
+}
+
+export async function rejectWithdrawal(txId: string) {
+  const supabase = await createClient()
+  const { error } = await (supabase as any).rpc('admin_reject_withdrawal', { p_tx_id: txId })
+  if (error) return { error: error.message as string }
+  revalidatePath('/admin')
+  return { success: true as const }
+}

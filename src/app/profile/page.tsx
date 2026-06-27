@@ -351,7 +351,7 @@ export default async function ProfilePage() {
                         isPending ? 'text-yellow-400' :
                         'text-[#3a375e]'
                       }`}>
-                        {isFailed ? 'Fallido' : isPending ? 'Pendiente' : date}
+                        {isFailed ? (isWithdrawal ? 'Rechazado' : 'Fallido') : isPending ? 'Pendiente' : date}
                       </p>
                     </div>
                   </div>

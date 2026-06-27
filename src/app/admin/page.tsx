@@ -1,5 +1,6 @@
 ﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Navbar from '@/components/Navbar'
 import AdminPanel from './AdminPanel'
 import { ShieldCheck } from 'lucide-react'
@@ -125,6 +126,34 @@ export default async function AdminPage() {
     totalUsers: totalUsers ?? 0,
   }
 
+  // Fetch pending withdrawals (requires admin client to bypass RLS)
+  const adminDb = createAdminClient()
+  const { data: pendingTxsRaw } = await adminDb
+    .from('transactions')
+    .select('id, amount, recipient, created_at, user_id')
+    .eq('type', 'withdrawal')
+    .eq('status', 'pending')
+    .order('created_at')
+
+  const pendingTxs = (pendingTxsRaw ?? []) as any[]
+  let withdrawalPlayerMap: Record<string, { username: string; display_name: string | null }> = {}
+
+  if (pendingTxs.length > 0) {
+    const userIds = [...new Set(pendingTxs.map((t: any) => t.user_id))]
+    const { data: wProfilesRaw } = await adminDb
+      .from('profiles')
+      .select('id, username, display_name')
+      .in('id', userIds)
+    for (const p of (wProfilesRaw ?? []) as any[]) {
+      withdrawalPlayerMap[p.id] = { username: p.username, display_name: p.display_name }
+    }
+  }
+
+  const pendingWithdrawals = pendingTxs.map((t: any) => ({
+    ...t,
+    player: withdrawalPlayerMap[t.user_id] ?? null,
+  }))
+
   return (
     <div className="min-h-screen bg-[#08071a]">
       <Navbar />
@@ -144,6 +173,7 @@ export default async function AdminPage() {
           initialDisputes={enrichedDisputes}
           initialActiveMatches={activeMatches}
           users={users}
+          initialWithdrawals={pendingWithdrawals}
         />
       </main>
     </div>

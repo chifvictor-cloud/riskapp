@@ -1,12 +1,12 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { resolveDispute } from './actions'
+import { resolveDispute, completeWithdrawal, rejectWithdrawal } from './actions'
 import {
   ShieldAlert, Trophy, ImageIcon, Check, AlertCircle, X, Clock,
   Swords, Users, TrendingUp, LayoutDashboard, Wifi, Crown,
-  ChevronRight, BadgeCheck,
+  ChevronRight, BadgeCheck, ArrowUpRight, Mail, Wallet,
 } from 'lucide-react'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -57,12 +57,21 @@ interface User {
   is_admin: boolean
   created_at: string
 }
+interface PendingWithdrawal {
+  id: string
+  amount: number
+  recipient: string | null
+  created_at: string
+  user_id: string
+  player: { username: string; display_name: string | null } | null
+}
 
 interface Props {
   stats: Stats
   initialDisputes: DisputedMatch[]
   initialActiveMatches: ActiveMatch[]
   users: User[]
+  initialWithdrawals: PendingWithdrawal[]
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -110,7 +119,6 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
 
   return (
     <>
-      {/* Lightbox */}
       {expandScreenshot && (
         <div
           className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
@@ -124,7 +132,6 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
       )}
 
       <div className="bg-[#0f0e2a] border border-yellow-400/25 rounded-2xl overflow-hidden">
-        {/* Header */}
         <div className="flex items-center gap-3 px-5 py-4 border-b border-[#1e1b4b] bg-yellow-400/3">
           <ShieldAlert size={15} className="text-yellow-400 flex-shrink-0" />
           <div className="flex-1 min-w-0">
@@ -137,7 +144,6 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
         </div>
 
         <div className="p-5 space-y-5">
-          {/* Players */}
           <div className="grid grid-cols-2 gap-4">
             {[
               {
@@ -152,7 +158,6 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
               },
             ].map(({ name, epic, claimed, id, screenshotUrl }) => (
               <div key={id} className="space-y-2">
-                {/* Player info */}
                 <div className="bg-[#0f0e2a] border border-[#201e50] rounded-xl p-3 space-y-0.5">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-white font-bold text-sm truncate">{name}</p>
@@ -164,16 +169,10 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
                       {claimed === id ? '✓ Dice ganó' : '✗ Dice perdió'}
                     </span>
                   </div>
-                  {epic && (
-                    <p className="text-[#8b5cf6] text-xs font-mono">{epic}</p>
-                  )}
+                  {epic && <p className="text-[#8b5cf6] text-xs font-mono">{epic}</p>}
                 </div>
-                {/* Screenshot */}
                 {screenshotUrl ? (
-                  <button
-                    onClick={() => setExpandScreenshot(screenshotUrl)}
-                    className="w-full block"
-                  >
+                  <button onClick={() => setExpandScreenshot(screenshotUrl)} className="w-full block">
                     <img
                       src={screenshotUrl}
                       alt="Evidencia"
@@ -190,7 +189,6 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
             ))}
           </div>
 
-          {/* Error */}
           {error && (
             <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">
               <AlertCircle size={13} className="text-red-400 flex-shrink-0" />
@@ -198,7 +196,6 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
             </div>
           )}
 
-          {/* Note */}
           <input
             type="text"
             value={note}
@@ -207,7 +204,6 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
             className="w-full bg-[#0f0e2a] border border-[#272454] focus:border-[#8b5cf6] rounded-xl px-4 py-2.5 text-white placeholder-[#444] outline-none text-sm transition-colors"
           />
 
-          {/* Resolve */}
           <div className="space-y-2">
             <p className="text-[#555] text-xs text-center font-medium">¿Quién ganó realmente?</p>
             <div className="grid grid-cols-2 gap-2">
@@ -235,14 +231,134 @@ function DisputeCard({ match, onResolved }: { match: DisputedMatch; onResolved: 
   )
 }
 
+// ── Withdrawal Card ───────────────────────────────────────────────────────────
+
+function WithdrawalCard({ w, onAction }: { w: PendingWithdrawal; onAction: (id: string) => void }) {
+  const [isPendingComplete, startComplete] = useTransition()
+  const [isPendingReject, startReject] = useTransition()
+  const [done, setDone] = useState<'paid' | 'rejected' | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const name = w.player?.display_name || w.player?.username || 'Usuario'
+  const username = w.player?.username ?? ''
+  const date = new Date(w.created_at).toLocaleDateString('es-MX', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  })
+  const time = new Date(w.created_at).toLocaleTimeString('es-MX', {
+    hour: '2-digit', minute: '2-digit',
+  })
+
+  const handleComplete = () => {
+    setError(null)
+    startComplete(async () => {
+      const result = await completeWithdrawal(w.id)
+      if ('error' in result) { setError(result.error ?? null); return }
+      setDone('paid')
+      setTimeout(() => onAction(w.id), 1400)
+    })
+  }
+
+  const handleReject = () => {
+    setError(null)
+    startReject(async () => {
+      const result = await rejectWithdrawal(w.id)
+      if ('error' in result) { setError(result.error ?? null); return }
+      setDone('rejected')
+      setTimeout(() => onAction(w.id), 1400)
+    })
+  }
+
+  if (done === 'paid') {
+    return (
+      <div className="bg-green-500/8 border border-green-500/20 rounded-2xl p-5 flex items-center justify-center gap-3 h-20">
+        <Check size={18} className="text-green-400" />
+        <p className="text-green-400 font-bold text-sm">Marcado como pagado · ${w.amount.toFixed(2)} MXN enviados</p>
+      </div>
+    )
+  }
+
+  if (done === 'rejected') {
+    return (
+      <div className="bg-red-500/8 border border-red-500/20 rounded-2xl p-5 flex items-center justify-center gap-3 h-20">
+        <X size={18} className="text-red-400" />
+        <p className="text-red-400 font-bold text-sm">Retiro rechazado · balance restaurado al jugador</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="bg-[#0f0e2a] border border-[#8b5cf6]/20 rounded-2xl overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-[#1e1b4b]">
+        <div className="w-9 h-9 rounded-xl bg-[#8b5cf6] flex items-center justify-center text-white font-black text-sm flex-shrink-0">
+          {name[0].toUpperCase()}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-bold text-sm">{name}</p>
+          {username && <p className="text-[#555] text-xs">@{username}</p>}
+        </div>
+        <div className="text-right flex-shrink-0">
+          <p className="text-[#8b5cf6] font-black text-lg">${w.amount.toFixed(2)}</p>
+          <p className="text-[#555] text-xs">MXN</p>
+        </div>
+      </div>
+
+      {/* Details */}
+      <div className="px-5 py-4 space-y-3">
+        <div className="flex items-center gap-3 text-sm">
+          <Mail size={13} className="text-[#555] flex-shrink-0" />
+          <span className="text-[#888]">MercadoPago</span>
+          <span className="text-white font-mono text-xs ml-auto truncate max-w-[200px]">
+            {w.recipient ?? '—'}
+          </span>
+        </div>
+        <div className="flex items-center gap-3 text-sm">
+          <Clock size={13} className="text-[#555] flex-shrink-0" />
+          <span className="text-[#888]">Solicitado</span>
+          <span className="text-white text-xs ml-auto">{date}, {time}</span>
+        </div>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="mx-5 mb-3 flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-xl px-3 py-2.5">
+          <AlertCircle size={13} className="text-red-400 flex-shrink-0" />
+          <p className="text-red-400 text-xs">{error}</p>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="px-5 pb-5 grid grid-cols-2 gap-2">
+        <button
+          onClick={handleComplete}
+          disabled={isPendingComplete || isPendingReject}
+          className="flex items-center justify-center gap-2 bg-green-500/10 hover:bg-green-500/18 disabled:opacity-40 border border-green-500/30 text-green-400 font-bold py-3 rounded-xl transition-all text-sm"
+        >
+          <Check size={14} />
+          {isPendingComplete ? 'Procesando…' : 'Marcar pagado'}
+        </button>
+        <button
+          onClick={handleReject}
+          disabled={isPendingComplete || isPendingReject}
+          className="flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/18 disabled:opacity-40 border border-red-500/30 text-red-400 font-bold py-3 rounded-xl transition-all text-sm"
+        >
+          <X size={14} />
+          {isPendingReject ? 'Procesando…' : 'Rechazar'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ── Main Panel ────────────────────────────────────────────────────────────────
 
-type Tab = 'dashboard' | 'disputes' | 'matches' | 'users'
+type Tab = 'dashboard' | 'disputes' | 'matches' | 'users' | 'withdrawals'
 
-export default function AdminPanel({ stats: initialStats, initialDisputes, initialActiveMatches, users }: Props) {
+export default function AdminPanel({ stats: initialStats, initialDisputes, initialActiveMatches, users, initialWithdrawals }: Props) {
   const [tab, setTab] = useState<Tab>('dashboard')
   const [disputes, setDisputes] = useState<DisputedMatch[]>(initialDisputes)
   const [activeMatches, setActiveMatches] = useState<ActiveMatch[]>(initialActiveMatches)
+  const [withdrawals, setWithdrawals] = useState<PendingWithdrawal[]>(initialWithdrawals)
   const [stats, setStats] = useState(initialStats)
   const [liveIndicator, setLiveIndicator] = useState(false)
   const supabase = createClient()
@@ -305,14 +421,41 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
     if (data) setActiveMatches(data as any)
   }
 
+  const fetchWithdrawals = async () => {
+    const { data: txs } = await supabase
+      .from('transactions')
+      .select('id, amount, recipient, created_at, user_id')
+      .eq('type', 'withdrawal')
+      .eq('status', 'pending')
+      .order('created_at')
+
+    if (!txs?.length) { setWithdrawals([]); return }
+
+    const ids = [...new Set(txs.map((t: any) => t.user_id))]
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, username, display_name')
+      .in('id', ids)
+
+    const pm: Record<string, any> = {}
+    for (const p of profiles ?? []) pm[(p as any).id] = p
+
+    setWithdrawals(txs.map((t: any) => ({ ...t, player: pm[t.user_id] ?? null })))
+  }
+
   // ── Realtime subscription ──────────────────────────────────────────────────
 
   useEffect(() => {
     const channel = supabase
-      .channel('admin-matches-realtime')
+      .channel('admin-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, () => {
         fetchDisputes()
         fetchActiveMatches()
+        setLiveIndicator(true)
+        setTimeout(() => setLiveIndicator(false), 800)
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
+        fetchWithdrawals()
         setLiveIndicator(true)
         setTimeout(() => setLiveIndicator(false), 800)
       })
@@ -326,14 +469,15 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'disputes', label: 'Disputas', badge: disputes.length },
     { id: 'matches', label: 'Partidas', badge: activeMatches.length },
+    { id: 'withdrawals', label: 'Retiros', badge: withdrawals.length },
     { id: 'users', label: 'Usuarios' },
   ]
 
   return (
     <div className="space-y-6">
       {/* Live indicator + tabs */}
-      <div className="flex items-center justify-between">
-        <div className="flex gap-1 bg-[#0f0e2a] border border-[#1e1b4b] rounded-xl p-1">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex gap-1 bg-[#0f0e2a] border border-[#1e1b4b] rounded-xl p-1 flex-wrap">
           {TABS.map(t => (
             <button
               key={t.id}
@@ -363,7 +507,6 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
       {/* ── DASHBOARD TAB ── */}
       {tab === 'dashboard' && (
         <div className="space-y-6">
-          {/* Stats grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
@@ -419,8 +562,47 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
             ))}
           </div>
 
-          {/* Quick status */}
           <div className="grid sm:grid-cols-2 gap-4">
+            {/* Pending withdrawals summary */}
+            <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-5">
+              <h3 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
+                <ArrowUpRight size={14} className="text-[#8b5cf6]" />
+                Retiros pendientes
+              </h3>
+              {withdrawals.length === 0 ? (
+                <div className="flex items-center gap-2 text-[#555] text-sm py-2">
+                  <Check size={14} className="text-green-400" />
+                  Sin retiros pendientes
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {withdrawals.slice(0, 3).map(w => {
+                    const name = w.player?.display_name || w.player?.username || 'Usuario'
+                    return (
+                      <button
+                        key={w.id}
+                        onClick={() => setTab('withdrawals')}
+                        className="w-full flex items-center gap-3 text-left hover:bg-[#0f0e2a] rounded-xl px-3 py-2 transition-colors"
+                      >
+                        <div className="w-2 h-2 rounded-full bg-[#8b5cf6] animate-pulse flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white text-xs font-semibold truncate">{name}</p>
+                          <p className="text-[#555] text-[10px]">{w.recipient}</p>
+                        </div>
+                        <p className="text-[#8b5cf6] text-xs font-black flex-shrink-0">${w.amount.toFixed(0)}</p>
+                        <ChevronRight size={13} className="text-[#3a375e]" />
+                      </button>
+                    )
+                  })}
+                  {withdrawals.length > 3 && (
+                    <button onClick={() => setTab('withdrawals')} className="text-[#8b5cf6] text-xs hover:underline mt-1">
+                      +{withdrawals.length - 3} más →
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-5">
               <h3 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
                 <ShieldAlert size={14} className="text-yellow-400" />
@@ -450,41 +632,6 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
                   {disputes.length > 3 && (
                     <button onClick={() => setTab('disputes')} className="text-[#8b5cf6] text-xs hover:underline mt-1">
                       +{disputes.length - 3} más →
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-
-            <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-5">
-              <h3 className="text-white font-bold mb-3 flex items-center gap-2 text-sm">
-                <Swords size={14} className="text-[#8b5cf6]" />
-                Partidas activas
-              </h3>
-              {activeMatches.length === 0 ? (
-                <p className="text-[#555] text-sm py-2">Ninguna en curso ahora</p>
-              ) : (
-                <div className="space-y-2">
-                  {activeMatches.slice(0, 3).map(m => {
-                    const p1r = !!m.player1_claimed_winner
-                    const p2r = !!m.player2_claimed_winner
-                    return (
-                      <a key={m.id} href={`/match/${m.id}`} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-3 hover:bg-[#0f0e2a] rounded-xl px-3 py-2 transition-colors">
-                        <div className="w-2 h-2 rounded-full bg-[#8b5cf6] animate-pulse flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-xs font-semibold truncate">{m.tournament?.title}</p>
-                          <p className="text-[#555] text-[10px]">
-                            {p1r && p2r ? 'Ambos reportaron' : p1r || p2r ? 'Uno reportó' : 'Sin reporte'} · {elapsed(m.created_at)}
-                          </p>
-                        </div>
-                        <ChevronRight size={13} className="text-[#3a375e]" />
-                      </a>
-                    )
-                  })}
-                  {activeMatches.length > 3 && (
-                    <button onClick={() => setTab('matches')} className="text-[#8b5cf6] text-xs hover:underline mt-1">
-                      +{activeMatches.length - 3} más →
                     </button>
                   )}
                 </div>
@@ -528,7 +675,6 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
             </div>
           ) : (
             <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl overflow-hidden">
-              {/* Table header */}
               <div className="grid grid-cols-[1fr_1fr_80px_80px_100px] gap-4 px-5 py-3 border-b border-[#1e1b4b] text-[#555] text-xs font-medium">
                 <span>Torneo</span>
                 <span>Jugadores</span>
@@ -587,10 +733,53 @@ export default function AdminPanel({ stats: initialStats, initialDisputes, initi
         </div>
       )}
 
+      {/* ── WITHDRAWALS TAB ── */}
+      {tab === 'withdrawals' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-white font-bold flex items-center gap-2">
+                <Wallet size={16} className="text-[#8b5cf6]" />
+                Retiros pendientes
+              </h2>
+              <p className="text-[#555] text-xs mt-0.5">
+                Transfiere manualmente el monto a la cuenta MercadoPago indicada, luego marca como pagado.
+              </p>
+            </div>
+            {withdrawals.length > 0 && (
+              <div className="flex-shrink-0 bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 rounded-xl px-3 py-1.5">
+                <p className="text-[#8b5cf6] text-sm font-black">
+                  Total: ${withdrawals.reduce((s, w) => s + w.amount, 0).toFixed(2)} MXN
+                </p>
+              </div>
+            )}
+          </div>
+
+          {withdrawals.length === 0 ? (
+            <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-12 text-center">
+              <div className="w-14 h-14 bg-green-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Check size={24} className="text-green-400" />
+              </div>
+              <p className="text-white font-bold text-lg">Sin retiros pendientes</p>
+              <p className="text-[#888] text-sm mt-1">Todos los retiros solicitados han sido procesados.</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {withdrawals.map(w => (
+                <WithdrawalCard
+                  key={w.id}
+                  w={w}
+                  onAction={(id) => setWithdrawals(prev => prev.filter(x => x.id !== id))}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── USERS TAB ── */}
       {tab === 'users' && (
         <div className="bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl overflow-hidden">
-          {/* Header */}
           <div className="grid grid-cols-[1fr_100px_80px_80px_70px] gap-4 px-5 py-3 border-b border-[#1e1b4b] text-[#555] text-xs font-medium">
             <span>Usuario</span>
             <span>Balance</span>
