@@ -68,7 +68,11 @@ export async function POST(request: Request) {
       return Response.json({ ok: true })
     }
 
-    const [userId, transactionId] = externalRef.split('::')
+    const parts = externalRef.split('::')
+    const userId = parts[0]
+    const transactionId = parts[1]
+    const isPoints = parts[2] === 'points'
+    const pointsToAdd = isPoints ? Number(parts[3]) : 0
     const amount = payment.transaction_amount ?? 0
 
     if (!userId || !transactionId || amount <= 0) {
@@ -79,6 +83,11 @@ export async function POST(request: Request) {
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     if (!UUID_RE.test(transactionId)) {
       console.log('[webhook] transactionId is not a UUID:', transactionId)
+      return Response.json({ ok: true })
+    }
+
+    if (isPoints && (!pointsToAdd || pointsToAdd <= 0)) {
+      console.log('[webhook] invalid points value:', parts[3])
       return Response.json({ ok: true })
     }
 
@@ -113,40 +122,51 @@ export async function POST(request: Request) {
     }
 
     // Mark transaction completed — the double .eq() prevents race conditions
-    const { error: txError } = await admin
+    const { error: txUpdateError } = await admin
       .from('transactions')
       .update({ status: 'completed', mp_payment_id: paymentId })
       .eq('id', transactionId)
       .eq('status', 'pending')
 
-    if (txError) {
-      console.error('[webhook] tx update error:', txError)
+    if (txUpdateError) {
+      console.error('[webhook] tx update error:', txUpdateError)
       return Response.json({ ok: true })
     }
 
-    // Credit balance
-    const { data: profile, error: profileError } = await admin
-      .from('profiles')
-      .select('balance')
-      .eq('id', userId)
-      .single()
+    if (isPoints) {
+      // Points purchase — delegate to RPC which handles the increment atomically
+      const { error: rpcError } = await admin.rpc('add_points', { user_id: userId, pts: pointsToAdd })
+      if (rpcError) {
+        console.error('[webhook] add_points error:', rpcError)
+        return Response.json({ ok: true })
+      }
+      console.log(`[webhook] added ${pointsToAdd} pts to user ${userId}`)
+    } else {
+      // Balance deposit — existing flow
+      const { data: profile, error: profileError } = await admin
+        .from('profiles')
+        .select('balance')
+        .eq('id', userId)
+        .single()
 
-    if (profileError || !profile) {
-      console.error('[webhook] profile not found:', profileError)
-      return Response.json({ ok: true })
+      if (profileError || !profile) {
+        console.error('[webhook] profile not found:', profileError)
+        return Response.json({ ok: true })
+      }
+
+      const { error: balanceError } = await admin
+        .from('profiles')
+        .update({ balance: profile.balance + amount })
+        .eq('id', userId)
+
+      if (balanceError) {
+        console.error('[webhook] balance update error:', balanceError)
+        return Response.json({ ok: true })
+      }
+
+      console.log(`[webhook] credited $${amount} to user ${userId}. New balance: ${profile.balance + amount}`)
     }
 
-    const { error: balanceError } = await admin
-      .from('profiles')
-      .update({ balance: profile.balance + amount })
-      .eq('id', userId)
-
-    if (balanceError) {
-      console.error('[webhook] balance update error:', balanceError)
-      return Response.json({ ok: true })
-    }
-
-    console.log(`[webhook] credited $${amount} to user ${userId}. New balance: ${profile.balance + amount}`)
     return Response.json({ ok: true })
 
   } catch (err) {

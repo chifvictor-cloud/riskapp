@@ -50,8 +50,26 @@ export default function StoreClient({ userPoints, isVip, products, initialRedemp
   const [successId, setSuccessId] = useState<string | null>(null)
   const [errorId, setErrorId] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string>('')
+  const [buyingPkg, setBuyingPkg] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [pendingProductId, setPendingProductId] = useState<string | null>(null)
+
+  const handleBuyPackage = async (packageId: string) => {
+    setBuyingPkg(packageId)
+    try {
+      const res = await fetch('/api/payments/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ packageId }),
+      })
+      const data = await res.json()
+      if (!res.ok) { alert(data.error || 'Error al crear el pago'); setBuyingPkg(null); return }
+      const url = process.env.NODE_ENV === 'production' ? data.init_point : data.sandbox_init_point
+      window.location.href = url
+    } catch {
+      alert('Error de conexión'); setBuyingPkg(null)
+    }
+  }
 
   const handleRedeem = (product: Product) => {
     if (points < product.points_cost) return
@@ -143,15 +161,21 @@ export default function StoreClient({ userPoints, isVip, products, initialRedemp
         </div>
 
         {/* Point packages */}
-        <div className="md:col-span-2 grid sm:grid-cols-2 gap-4">
+        <div className="md:col-span-2 grid sm:grid-cols-3 gap-4">
           {[
-            { pts: 1000, price: 29, color: '#8b5cf6' },
-            { pts: 5000, price: 99, color: '#3b82f6', popular: true },
+            { id: 'p1', pts: 1000,  price: 29,  color: '#8b5cf6' },
+            { id: 'p2', pts: 5000,  price: 99,  color: '#3b82f6', popular: true },
+            { id: 'p3', pts: 11000, price: 199, color: '#10b981', bestValue: true },
           ].map(pkg => (
-            <div key={pkg.pts} className="relative bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-5">
+            <div key={pkg.id} className="relative bg-[#0f0e2a] border border-[#1e1b4b] rounded-2xl p-5">
               {pkg.popular && (
-                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#8b5cf6] text-white text-[10px] font-black px-3 py-0.5 rounded-full">
+                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-[#3b82f6] text-white text-[10px] font-black px-3 py-0.5 rounded-full">
                   MÁS POPULAR
+                </div>
+              )}
+              {pkg.bestValue && (
+                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-white text-[10px] font-black px-3 py-0.5 rounded-full" style={{ background: pkg.color }}>
+                  MEJOR VALOR
                 </div>
               )}
               <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: `${pkg.color}18` }}>
@@ -163,11 +187,12 @@ export default function StoreClient({ userPoints, isVip, products, initialRedemp
               </div>
               <p className="text-[#888] text-xs mb-4">${pkg.price} MXN</p>
               <button
-                onClick={() => alert('Próximamente — integración de pagos en desarrollo')}
-                className="w-full py-2.5 rounded-xl text-sm font-bold transition-all border"
+                onClick={() => handleBuyPackage(pkg.id)}
+                disabled={buyingPkg !== null}
+                className="w-full py-2.5 rounded-xl text-sm font-bold transition-all border disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: `${pkg.color}15`, borderColor: `${pkg.color}30`, color: pkg.color }}
               >
-                Comprar
+                {buyingPkg === pkg.id ? 'Procesando...' : 'Comprar'}
               </button>
             </div>
           ))}
