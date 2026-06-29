@@ -89,6 +89,118 @@ function StreamEmbed({ url }: { url: string }) {
   return null
 }
 
+function MatchArena({
+  p1Name, p2Name, p1EpicUsername, p2EpicUsername,
+  p1Profile, p2Profile, p1WR, p2WR,
+  prizePool, gameMode, elapsed, formatTime,
+}: {
+  p1Name: string; p2Name: string
+  p1EpicUsername: string | null; p2EpicUsername: string | null
+  p1Profile: { wins: number; losses: number; points: number } | null
+  p2Profile: { wins: number; losses: number; points: number } | null
+  p1WR: number; p2WR: number
+  prizePool: number; gameMode: string
+  elapsed: number; formatTime: (s: number) => string
+}) {
+  return (
+    <div className="relative w-full rounded-2xl overflow-hidden mb-5" style={{ minHeight: '260px' }}>
+      <style>{`
+        @keyframes arena-float {
+          0%, 100% { transform: translateY(0px); }
+          50%       { transform: translateY(-7px); }
+        }
+        @keyframes vs-glow {
+          0%, 100% { text-shadow: 0 0 16px rgba(139,92,246,0.7); transform: scale(1); }
+          50%       { text-shadow: 0 0 36px rgba(139,92,246,1), 0 0 72px rgba(139,92,246,0.4); transform: scale(1.08); }
+        }
+        .arena-float-1 { animation: arena-float 3.2s ease-in-out infinite; }
+        .arena-float-2 { animation: arena-float 3.2s ease-in-out infinite 0.6s; }
+        .vs-glow       { animation: vs-glow 2s ease-in-out infinite; }
+      `}</style>
+
+      {/* Dark base */}
+      <div className="absolute inset-0 bg-[#08071a]" />
+      {/* Grid pattern */}
+      <div className="absolute inset-0" style={{
+        backgroundImage: 'linear-gradient(rgba(139,92,246,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.06) 1px, transparent 1px)',
+        backgroundSize: '36px 36px',
+      }} />
+      {/* Purple glow blob, center */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-80 h-48 rounded-full bg-[#8b5cf6]/8 blur-3xl" />
+      </div>
+      {/* Border ring */}
+      <div className="absolute inset-0 rounded-2xl border border-[#1e1b4b]" />
+
+      <div className="relative z-10 px-6 py-5">
+        {/* Top bar: prize + EN VIVO */}
+        <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center gap-2">
+            <Trophy size={15} className="text-yellow-400 flex-shrink-0" />
+            <span className="text-yellow-400 font-black text-sm">${prizePool} MXN en juego</span>
+          </div>
+          <div className="flex items-center gap-1.5 bg-red-500/10 border border-red-500/20 rounded-full px-3 py-1">
+            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+            <span className="text-red-400 font-bold text-[11px] uppercase tracking-wider">En vivo</span>
+          </div>
+        </div>
+
+        {/* Game mode label */}
+        <p className="text-center text-[#444] text-[11px] uppercase tracking-[0.2em] mb-5">{gameMode}</p>
+
+        {/* Players + VS */}
+        <div className="flex items-center gap-3">
+
+          {/* Player 1 */}
+          <div className="flex-1 flex flex-col items-center text-center">
+            <div className="player-frame mb-3 w-[72px] h-[72px] rounded-full border-2 border-[#8b5cf6] bg-[#8b5cf6]/10 flex items-center justify-center shadow-[0_0_18px_rgba(139,92,246,0.35)] arena-float-1">
+              <span className="text-white font-black text-2xl select-none">{p1Name[0]?.toUpperCase()}</span>
+            </div>
+            <p className="text-white font-bold text-sm leading-tight">{p1Name}</p>
+            {p1EpicUsername && (
+              <p className="text-[#8b5cf6] text-[11px] font-mono mt-0.5 truncate max-w-[110px]">{p1EpicUsername}</p>
+            )}
+            {p1Profile && (
+              <div className="flex gap-2.5 mt-2">
+                <div><p className="text-white text-[11px] font-bold">{p1Profile.wins}</p><p className="text-[#555] text-[9px]">W</p></div>
+                <div><p className="text-[#8b5cf6] text-[11px] font-bold">{p1WR}%</p><p className="text-[#555] text-[9px]">WR</p></div>
+                <div><p className="text-white text-[11px] font-bold">{p1Profile.points}</p><p className="text-[#555] text-[9px]">pts</p></div>
+              </div>
+            )}
+          </div>
+
+          {/* VS + timer */}
+          <div className="flex flex-col items-center gap-2 flex-shrink-0 px-2">
+            <span className="vs-glow text-[#8b5cf6] font-black text-[2.5rem] leading-none">VS</span>
+            <div className="bg-[#0f0e2a] border border-[#272454] rounded-lg px-3 py-1.5 min-w-[64px] text-center">
+              <span className="text-white font-mono font-bold text-sm">{formatTime(elapsed)}</span>
+            </div>
+          </div>
+
+          {/* Player 2 */}
+          <div className="flex-1 flex flex-col items-center text-center">
+            <div className="player-frame mb-3 w-[72px] h-[72px] rounded-full border-2 border-[#3b82f6] bg-[#3b82f6]/10 flex items-center justify-center shadow-[0_0_18px_rgba(59,130,246,0.35)] arena-float-2">
+              <span className="text-white font-black text-2xl select-none">{p2Name[0]?.toUpperCase()}</span>
+            </div>
+            <p className="text-white font-bold text-sm leading-tight">{p2Name}</p>
+            {p2EpicUsername && (
+              <p className="text-[#3b82f6] text-[11px] font-mono mt-0.5 truncate max-w-[110px]">{p2EpicUsername}</p>
+            )}
+            {p2Profile && (
+              <div className="flex gap-2.5 mt-2">
+                <div><p className="text-white text-[11px] font-bold">{p2Profile.wins}</p><p className="text-[#555] text-[9px]">W</p></div>
+                <div><p className="text-[#3b82f6] text-[11px] font-bold">{p2WR}%</p><p className="text-[#555] text-[9px]">WR</p></div>
+                <div><p className="text-white text-[11px] font-bold">{p2Profile.points}</p><p className="text-[#555] text-[9px]">pts</p></div>
+              </div>
+            )}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function SpectateRoom({
   match: initMatch,
   tournament,
@@ -291,8 +403,24 @@ export default function SpectateRoom({
         </div>
       </div>
 
-      {/* ── Stream embed ─────────────────────────────────────────────────── */}
-      {tournament.stream_url && <StreamEmbed url={tournament.stream_url} />}
+      {/* ── Stream / Arena ───────────────────────────────────────────────── */}
+      {tournament.stream_url
+        ? <StreamEmbed url={tournament.stream_url} />
+        : <MatchArena
+            p1Name={p1Name}
+            p2Name={p2Name}
+            p1EpicUsername={player1?.epic_username ?? null}
+            p2EpicUsername={player2?.epic_username ?? null}
+            p1Profile={p1Profile ?? null}
+            p2Profile={p2Profile ?? null}
+            p1WR={p1WR}
+            p2WR={p2WR}
+            prizePool={tournament.prize_pool}
+            gameMode={tournament.game_mode}
+            elapsed={elapsed}
+            formatTime={formatTime}
+          />
+      }
 
       {/* ── Prediction won banner ────────────────────────────────────────── */}
       {isCompleted && myVoteWon && (
