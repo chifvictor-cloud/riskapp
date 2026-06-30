@@ -158,6 +158,7 @@ export type Database = {
           resolved_at: string | null
           spectator_count: number
           sponsor_id: string | null
+          betting_closes_at: string | null
         }
         Insert: {
           id?: string
@@ -179,6 +180,7 @@ export type Database = {
           resolved_at?: string | null
           spectator_count?: number
           sponsor_id?: string | null
+          betting_closes_at?: string | null
         }
         Update: {
           winner_id?: string | null
@@ -195,6 +197,33 @@ export type Database = {
           resolved_at?: string | null
           spectator_count?: number
           sponsor_id?: string | null
+          betting_closes_at?: string | null
+        }
+      }
+      match_bets: {
+        Row: {
+          id: string
+          match_id: string
+          user_id: string
+          bet_on: string
+          amount: number
+          status: 'open' | 'won' | 'lost' | 'refunded'
+          payout: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          match_id: string
+          user_id: string
+          bet_on: string
+          amount: number
+          status?: 'open' | 'won' | 'lost' | 'refunded'
+          payout?: number
+          created_at?: string
+        }
+        Update: {
+          status?: 'open' | 'won' | 'lost' | 'refunded'
+          payout?: number
         }
       }
       transactions: {

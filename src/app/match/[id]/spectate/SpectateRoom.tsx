@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Eye, Send, Crown, Star, Clock, Trophy, MessageCircle } from 'lucide-react'
+import { Eye, Send, Crown, Star, Clock, Trophy, MessageCircle, Coins, TrendingUp, Lock } from 'lucide-react'
 
 interface Player {
   player_id: string
@@ -32,6 +32,13 @@ interface SponsorRecord {
   profiles: { username: string; display_name: string | null } | null
 }
 
+interface MatchBet {
+  bet_on: string
+  amount: number
+  status: 'open' | 'won' | 'lost' | 'refunded'
+  payout: number
+}
+
 interface Props {
   match: any
   tournament: any
@@ -42,6 +49,9 @@ interface Props {
   initialVoteCounts: Record<string, number>
   initialMessages: ChatMessage[]
   sponsors: SponsorRecord[]
+  initialBetTotals: Record<string, number>
+  myBet: MatchBet | null
+  myPoints: number
 }
 
 function StreamEmbed({ url }: { url: string }) {
@@ -201,6 +211,206 @@ function MatchArena({
   )
 }
 
+function BettingPanel({
+  p1Name, p2Name, player1Id, player2Id,
+  bettingOpen, bettingSecondsLeft,
+  betTotals, myBet, myPoints,
+  betTarget, setBetTarget,
+  betAmount, setBetAmount,
+  betError, placingBet, onPlaceBet,
+}: {
+  match: any
+  p1Name: string
+  p2Name: string
+  player1Id: string
+  player2Id: string
+  bettingOpen: boolean
+  bettingSecondsLeft: number
+  betTotals: Record<string, number>
+  myBet: MatchBet | null
+  myPoints: number
+  betTarget: string | null
+  setBetTarget: (id: string) => void
+  betAmount: string
+  setBetAmount: (v: string) => void
+  betError: string | null
+  placingBet: boolean
+  onPlaceBet: () => void
+}) {
+  const p1Total = betTotals[player1Id] ?? 0
+  const p2Total = betTotals[player2Id] ?? 0
+  const grandTotal = p1Total + p2Total
+  const p1Pct = grandTotal > 0 ? Math.round((p1Total / grandTotal) * 100) : 50
+  const p2Pct = grandTotal > 0 ? 100 - p1Pct : 50
+
+  const betStatusLabel = (status: MatchBet['status']) => {
+    const map = { open: 'En juego', won: '¡Ganaste!', lost: 'Perdiste', refunded: 'Reembolsado' }
+    return map[status]
+  }
+  const betStatusColor = (status: MatchBet['status']) => {
+    const map = { open: 'text-[#e85d24]', won: 'text-yellow-400', lost: 'text-red-400', refunded: 'text-[#888]' }
+    return map[status]
+  }
+
+  return (
+    <div className="bg-[#111] border border-[#e85d24]/20 rounded-2xl p-5">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-[#e85d24]/10 rounded-lg flex items-center justify-center">
+            <TrendingUp size={14} className="text-[#e85d24]" />
+          </div>
+          <span className="text-white font-bold text-sm">Apuestas pari-mutuel</span>
+        </div>
+
+        {bettingOpen ? (
+          <div className="flex items-center gap-2 bg-[#e85d24]/10 border border-[#e85d24]/20 rounded-full px-3 py-1">
+            <div className="w-1.5 h-1.5 bg-[#e85d24] rounded-full animate-pulse" />
+            <span className="text-[#e85d24] font-mono font-bold text-xs">{bettingSecondsLeft}s</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 text-[#555] text-xs">
+            <Lock size={11} />
+            <span>Ventana cerrada</span>
+          </div>
+        )}
+      </div>
+
+      {/* Pot bars */}
+      <div className="mb-4">
+        <div className="flex justify-between text-xs mb-1.5">
+          <span className="text-[#8b5cf6] font-bold truncate max-w-[120px]">{p1Name}</span>
+          <span className="text-[#555]">Pozo: <span className="text-white font-bold">{grandTotal} pts</span></span>
+          <span className="text-[#3b82f6] font-bold truncate max-w-[120px] text-right">{p2Name}</span>
+        </div>
+        <div className="flex h-2.5 rounded-full overflow-hidden bg-[#222]">
+          <div
+            className="bg-[#8b5cf6] transition-all duration-700"
+            style={{ width: `${p1Pct}%` }}
+          />
+          <div
+            className="bg-[#3b82f6] transition-all duration-700"
+            style={{ width: `${p2Pct}%` }}
+          />
+        </div>
+        <div className="flex justify-between text-[10px] mt-1">
+          <span className="text-[#8b5cf6]">{p1Total} pts · {p1Pct}%</span>
+          <span className="text-[#3b82f6]">{p2Total} pts · {p2Pct}%</span>
+        </div>
+      </div>
+
+      {/* My bet result */}
+      {myBet && (
+        <div className={`bg-[#0a0a0a] border border-[#222] rounded-xl px-4 py-3 flex items-center justify-between ${myBet.status !== 'open' ? 'mb-0' : 'mb-0'}`}>
+          <div className="flex items-center gap-2">
+            <Coins size={14} className="text-[#e85d24]" />
+            <span className="text-[#888] text-sm">Tu apuesta: <span className="text-white font-bold">{myBet.amount} pts</span></span>
+          </div>
+          <div className="text-right">
+            <span className={`text-sm font-bold ${betStatusColor(myBet.status)}`}>{betStatusLabel(myBet.status)}</span>
+            {myBet.status === 'won' && myBet.payout > 0 && (
+              <span className="text-yellow-400 text-xs ml-2">+{myBet.payout} pts</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Bet form — only when window open and no existing bet */}
+      {!myBet && (
+        <div className={`transition-opacity ${bettingOpen ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+          {/* Player selector */}
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <button
+              onClick={() => setBetTarget(player1Id)}
+              className={`rounded-xl border p-3 text-center transition-all ${
+                betTarget === player1Id
+                  ? 'border-[#8b5cf6] bg-[#8b5cf6]/10'
+                  : 'border-[#222] bg-[#0a0a0a] hover:border-[#8b5cf6]/40'
+              }`}
+            >
+              <div className={`w-8 h-8 rounded-full mx-auto mb-1.5 flex items-center justify-center text-white font-black text-sm ${
+                betTarget === player1Id ? 'bg-[#8b5cf6]' : 'bg-[#1e1b4b]'
+              }`}>
+                {p1Name[0]?.toUpperCase()}
+              </div>
+              <p className="text-white text-xs font-bold truncate">{p1Name}</p>
+              <p className="text-[#8b5cf6] text-[10px] mt-0.5">{p1Total} pts apostados</p>
+            </button>
+
+            <button
+              onClick={() => setBetTarget(player2Id)}
+              className={`rounded-xl border p-3 text-center transition-all ${
+                betTarget === player2Id
+                  ? 'border-[#3b82f6] bg-[#3b82f6]/10'
+                  : 'border-[#222] bg-[#0a0a0a] hover:border-[#3b82f6]/40'
+              }`}
+            >
+              <div className={`w-8 h-8 rounded-full mx-auto mb-1.5 flex items-center justify-center text-white font-black text-sm ${
+                betTarget === player2Id ? 'bg-[#3b82f6]' : 'bg-[#1e2a4a]'
+              }`}>
+                {p2Name[0]?.toUpperCase()}
+              </div>
+              <p className="text-white text-xs font-bold truncate">{p2Name}</p>
+              <p className="text-[#3b82f6] text-[10px] mt-0.5">{p2Total} pts apostados</p>
+            </button>
+          </div>
+
+          {/* Amount + quick picks */}
+          <div className="flex gap-2 mb-3">
+            <div className="flex-1 relative">
+              <input
+                type="number"
+                min={10}
+                max={1000}
+                value={betAmount}
+                onChange={e => setBetAmount(e.target.value)}
+                placeholder="Monto (10–1000)"
+                className="w-full bg-[#0a0a0a] border border-[#222] focus:border-[#e85d24] rounded-lg px-3 py-2.5 text-white placeholder-[#444] outline-none text-sm transition-colors"
+              />
+            </div>
+            {[50, 100, 200, 500].map(v => (
+              <button
+                key={v}
+                onClick={() => setBetAmount(String(v))}
+                className="px-2.5 py-2.5 bg-[#0a0a0a] border border-[#222] hover:border-[#e85d24]/40 rounded-lg text-[#888] hover:text-white text-xs font-bold transition-colors flex-shrink-0"
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+
+          {/* Points hint */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[#555] text-xs flex items-center gap-1">
+              <Coins size={10} />
+              Saldo: <span className="text-white">{myPoints} pts</span>
+            </span>
+            {betTarget && betAmount && parseInt(betAmount) >= 10 && grandTotal > 0 && (
+              <span className="text-[#555] text-xs">
+                Pago estimado: ~<span className="text-[#e85d24] font-bold">
+                  {Math.floor(parseInt(betAmount) * (grandTotal + parseInt(betAmount)) * 0.95 / ((betTotals[betTarget] ?? 0) + parseInt(betAmount)))} pts
+                </span>
+              </span>
+            )}
+          </div>
+
+          {betError && (
+            <p className="text-red-400 text-xs mb-2">{betError}</p>
+          )}
+
+          <button
+            onClick={onPlaceBet}
+            disabled={!betTarget || !bettingOpen || placingBet}
+            className="w-full bg-[#e85d24] hover:bg-[#d04e1a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl text-sm transition-colors"
+          >
+            {placingBet ? 'Procesando...' : bettingOpen ? 'Apostar' : 'Ventana cerrada'}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function SpectateRoom({
   match: initMatch,
   tournament,
@@ -211,6 +421,9 @@ export default function SpectateRoom({
   initialVoteCounts,
   initialMessages,
   sponsors,
+  initialBetTotals,
+  myBet: initMyBet,
+  myPoints: initMyPoints,
 }: Props) {
   const supabase = createClient()
 
@@ -225,10 +438,20 @@ export default function SpectateRoom({
   const [predictionAwarded, setPredictionAwarded] = useState(false)
   const [isPending, startTransition] = useTransition()
 
+  // Betting state
+  const [betTotals, setBetTotals] = useState<Record<string, number>>(initialBetTotals)
+  const [myBet, setMyBet] = useState<MatchBet | null>(initMyBet)
+  const [myPoints, setMyPoints] = useState(initMyPoints)
+  const [betTarget, setBetTarget] = useState<string | null>(null)
+  const [betAmount, setBetAmount] = useState('100')
+  const [bettingSecondsLeft, setBettingSecondsLeft] = useState(0)
+  const [placingBet, setPlacingBet] = useState(false)
+  const [betError, setBetError] = useState<string | null>(null)
+
   const chatEndRef = useRef<HTMLDivElement>(null)
   const hasLeft = useRef(false)
 
-  // Timer
+  // Match elapsed timer
   useEffect(() => {
     const startTime = new Date(match.created_at).getTime()
     const tick = () => setElapsed(Math.floor((Date.now() - startTime) / 1000))
@@ -236,6 +459,19 @@ export default function SpectateRoom({
     const interval = setInterval(tick, 1000)
     return () => clearInterval(interval)
   }, [match.created_at])
+
+  // Betting countdown timer
+  useEffect(() => {
+    if (!match.betting_closes_at) return
+    const closesAt = new Date(match.betting_closes_at).getTime()
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((closesAt - Date.now()) / 1000))
+      setBettingSecondsLeft(left)
+    }
+    tick()
+    const interval = setInterval(tick, 500)
+    return () => clearInterval(interval)
+  }, [match.betting_closes_at])
 
   // Join spectate on mount
   useEffect(() => {
@@ -308,6 +544,35 @@ export default function SpectateRoom({
           .single()
         setMessages(prev => [...prev, { ...msg, profiles: profile ?? null }])
       })
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'match_bets',
+        filter: `match_id=eq.${match.id}`,
+      }, (payload) => {
+        const bet = payload.new as any
+        if (bet.status === 'open') {
+          setBetTotals(prev => ({
+            ...prev,
+            [bet.bet_on]: (prev[bet.bet_on] ?? 0) + bet.amount,
+          }))
+        }
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'match_bets',
+        filter: `match_id=eq.${match.id}`,
+      }, (payload) => {
+        const bet = payload.new as any
+        // Update myBet if it's mine
+        if (bet.user_id === userId) {
+          setMyBet(bet as MatchBet)
+        }
+        // Rebuild totals from DB on any update (resolve/refund)
+        if (bet.status !== 'open') {
+          setBetTotals(prev => ({
+            ...prev,
+            [bet.bet_on]: Math.max(0, (prev[bet.bet_on] ?? 0) - bet.amount),
+          }))
+        }
+      })
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
@@ -345,6 +610,48 @@ export default function SpectateRoom({
       setSendingChat(false)
     }
   }
+
+  const handlePlaceBet = async () => {
+    if (!betTarget || placingBet || myBet) return
+    const amount = parseInt(betAmount, 10)
+    if (isNaN(amount) || amount < 10 || amount > 1000) {
+      setBetError('El monto debe estar entre 10 y 1000 pts')
+      return
+    }
+    if (amount > myPoints) {
+      setBetError('Puntos insuficientes')
+      return
+    }
+    setBetError(null)
+    setPlacingBet(true)
+    try {
+      const { data, error } = await (supabase as any).rpc('place_bet', {
+        p_match_id: match.id,
+        p_bet_on: betTarget,
+        p_amount: amount,
+      })
+      if (error || data?.error) {
+        const code = data?.error ?? error?.message
+        const msgs: Record<string, string> = {
+          betting_window_closed: 'La ventana de apuestas ya cerró',
+          already_bet: 'Ya tienes una apuesta en este match',
+          insufficient_points: 'Puntos insuficientes',
+          invalid_amount: 'Monto inválido (10–1000)',
+          invalid_bet_target: 'Jugador inválido',
+          not_authenticated: 'Debes iniciar sesión',
+        }
+        setBetError(msgs[code] ?? 'Error al apostar')
+        return
+      }
+      setMyBet({ bet_on: betTarget, amount, status: 'open', payout: 0 })
+      setMyPoints(prev => prev - amount)
+      setBetTotals(prev => ({ ...prev, [betTarget]: (prev[betTarget] ?? 0) + amount }))
+    } finally {
+      setPlacingBet(false)
+    }
+  }
+
+  const bettingOpen = !!match.betting_closes_at && bettingSecondsLeft > 0
 
   const totalVotes = Object.values(voteCounts).reduce((a, b) => a + b, 0)
   const p1Votes = voteCounts[match.player1_id] ?? 0
@@ -421,6 +728,29 @@ export default function SpectateRoom({
             formatTime={formatTime}
           />
       }
+
+      {/* ── Betting panel ───────────────────────────────────────────────── */}
+      {match.betting_closes_at && (
+        <BettingPanel
+          match={match}
+          p1Name={p1Name}
+          p2Name={p2Name}
+          player1Id={match.player1_id}
+          player2Id={match.player2_id}
+          bettingOpen={bettingOpen}
+          bettingSecondsLeft={bettingSecondsLeft}
+          betTotals={betTotals}
+          myBet={myBet}
+          myPoints={myPoints}
+          betTarget={betTarget}
+          setBetTarget={setBetTarget}
+          betAmount={betAmount}
+          setBetAmount={setBetAmount}
+          betError={betError}
+          placingBet={placingBet}
+          onPlaceBet={handlePlaceBet}
+        />
+      )}
 
       {/* ── Prediction won banner ────────────────────────────────────────── */}
       {isCompleted && myVoteWon && (

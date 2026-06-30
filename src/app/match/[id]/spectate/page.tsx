@@ -29,6 +29,9 @@ export default async function SpectatePage({ params }: { params: Promise<{ id: s
     { data: voteSessionsRaw },
     { data: messagesRaw },
     { data: sponsorsRaw },
+    { data: betsRaw },
+    { data: myBetRaw },
+    { data: myProfileRaw },
   ] = await Promise.all([
     supabase.from('tournaments').select('*').eq('id', match.tournament_id).single(),
     supabase
@@ -58,6 +61,17 @@ export default async function SpectatePage({ params }: { params: Promise<{ id: s
       .select('player_id, sponsor_id, amount, status, profiles!sponsors_sponsor_id_fkey(username, display_name)')
       .eq('tournament_id', match.tournament_id)
       .eq('status', 'active'),
+    (supabase as any)
+      .from('match_bets')
+      .select('bet_on, amount, status')
+      .eq('match_id', id),
+    (supabase as any)
+      .from('match_bets')
+      .select('bet_on, amount, status, payout')
+      .eq('match_id', id)
+      .eq('user_id', user.id)
+      .maybeSingle(),
+    supabase.from('profiles').select('points').eq('id', user.id).single(),
   ])
 
   if (!tournamentRaw) notFound()
@@ -68,11 +82,22 @@ export default async function SpectatePage({ params }: { params: Promise<{ id: s
   const voteSessionsList = (voteSessionsRaw ?? []) as any[]
   const messages = ((messagesRaw ?? []) as any[]).reverse()
   const sponsors = (sponsorsRaw ?? []) as any[]
+  const allBets = (betsRaw ?? []) as any[]
+  const myBet = myBetRaw as any ?? null
+  const myPoints = (myProfileRaw as any)?.points ?? 0
 
   // Compute vote counts
   const voteCounts: Record<string, number> = {}
   for (const s of voteSessionsList) {
     if (s.voted_for) voteCounts[s.voted_for] = (voteCounts[s.voted_for] ?? 0) + 1
+  }
+
+  // Compute initial bet totals per player
+  const initialBetTotals: Record<string, number> = {}
+  for (const b of allBets) {
+    if (b.status === 'open') {
+      initialBetTotals[b.bet_on] = (initialBetTotals[b.bet_on] ?? 0) + b.amount
+    }
   }
 
   const player1 = participants.find((p: any) => p.player_id === match.player1_id) ?? null
@@ -97,6 +122,9 @@ export default async function SpectatePage({ params }: { params: Promise<{ id: s
           initialVoteCounts={voteCounts}
           initialMessages={messages}
           sponsors={sponsors}
+          initialBetTotals={initialBetTotals}
+          myBet={myBet}
+          myPoints={myPoints}
         />
       </main>
     </div>
