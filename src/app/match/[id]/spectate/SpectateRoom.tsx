@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Eye, Send, Crown, Star, Clock, Trophy, MessageCircle, Coins, TrendingUp, Lock } from 'lucide-react'
+import { Eye, Send, Crown, Star, Clock, Trophy, MessageCircle, Coins, TrendingUp, Lock, ChevronDown } from 'lucide-react'
+import MisApuestas from '@/components/MisApuestas'
 
 interface Player {
   player_id: string
@@ -438,6 +439,8 @@ export default function SpectateRoom({
   const [predictionAwarded, setPredictionAwarded] = useState(false)
   const [isPending, startTransition] = useTransition()
 
+  const [showMyBets, setShowMyBets] = useState(false)
+
   // Betting state
   const [betTotals, setBetTotals] = useState<Record<string, number>>(initialBetTotals)
   const [myBet, setMyBet] = useState<MatchBet | null>(initMyBet)
@@ -777,6 +780,30 @@ export default function SpectateRoom({
           </p>
         </div>
       )}
+
+      {/* ── Mis apuestas (toggle) ────────────────────────────────────────── */}
+      <div>
+        <button
+          onClick={() => setShowMyBets(v => !v)}
+          className="w-full flex items-center justify-between bg-[#111] border border-[#e85d24]/20 hover:border-[#e85d24]/40 rounded-2xl px-5 py-3 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-[#e85d24]/10 rounded-lg flex items-center justify-center">
+              <Coins size={12} className="text-[#e85d24]" />
+            </div>
+            <span className="text-white font-bold text-sm">Mis apuestas</span>
+          </div>
+          <ChevronDown
+            size={14}
+            className={`text-[#555] transition-transform duration-200 ${showMyBets ? 'rotate-180' : ''}`}
+          />
+        </button>
+        {showMyBets && (
+          <div className="mt-2">
+            <MisApuestas />
+          </div>
+        )}
+      </div>
 
       {/* ── Two columns: Voting | Chat ───────────────────────────────────── */}
       <div className="grid lg:grid-cols-3 gap-5">
