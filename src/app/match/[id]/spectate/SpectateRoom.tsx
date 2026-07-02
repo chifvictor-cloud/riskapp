@@ -38,6 +38,13 @@ interface MatchBet {
   amount: number
   status: 'open' | 'won' | 'lost' | 'refunded'
   payout: number
+  round_id?: string | null
+}
+
+interface BetRound {
+  id: string
+  round_number: number
+  closes_at: string
 }
 
 interface Props {
@@ -53,6 +60,9 @@ interface Props {
   initialBetTotals: Record<string, number>
   myBet: MatchBet | null
   myPoints: number
+  activeRound: BetRound | null
+  initialRoundBetTotals: Record<string, number>
+  myRoundBet: MatchBet | null
 }
 
 function StreamEmbed({ url }: { url: string }) {
@@ -219,6 +229,7 @@ function BettingPanel({
   betTarget, setBetTarget,
   betAmount, setBetAmount,
   betError, placingBet, onPlaceBet,
+  title = 'Apuestas pari-mutuel',
 }: {
   match: any
   p1Name: string
@@ -237,6 +248,7 @@ function BettingPanel({
   betError: string | null
   placingBet: boolean
   onPlaceBet: () => void
+  title?: string
 }) {
   const p1Total = betTotals[player1Id] ?? 0
   const p2Total = betTotals[player2Id] ?? 0
@@ -261,7 +273,7 @@ function BettingPanel({
           <div className="w-7 h-7 bg-[#e85d24]/10 rounded-lg flex items-center justify-center">
             <TrendingUp size={14} className="text-[#e85d24]" />
           </div>
-          <span className="text-white font-bold text-sm">Apuestas pari-mutuel</span>
+          <span className="text-white font-bold text-sm">{title}</span>
         </div>
 
         {bettingOpen ? (
@@ -425,6 +437,9 @@ export default function SpectateRoom({
   initialBetTotals,
   myBet: initMyBet,
   myPoints: initMyPoints,
+  activeRound,
+  initialRoundBetTotals,
+  myRoundBet: initMyRoundBet,
 }: Props) {
   const supabase = createClient()
 
@@ -451,6 +466,21 @@ export default function SpectateRoom({
   const [placingBet, setPlacingBet] = useState(false)
   const [betError, setBetError] = useState<string | null>(null)
 
+  // Extra betting rounds state
+  const [betRound, setBetRound] = useState<BetRound | null>(activeRound)
+  const [roundBetTotals, setRoundBetTotals] = useState<Record<string, number>>(initialRoundBetTotals)
+  const [myRoundBet, setMyRoundBet] = useState<MatchBet | null>(initMyRoundBet)
+  const [roundBetTarget, setRoundBetTarget] = useState<string | null>(null)
+  const [roundBetAmount, setRoundBetAmount] = useState('100')
+  const [roundSecondsLeft, setRoundSecondsLeft] = useState(0)
+  const [placingRoundBet, setPlacingRoundBet] = useState(false)
+  const [roundBetError, setRoundBetError] = useState<string | null>(null)
+  const [showNewRoundBanner, setShowNewRoundBanner] = useState(false)
+
+  // Los handlers realtime se crean una sola vez; el ref evita closures viejos sobre la ronda activa
+  const betRoundRef = useRef<BetRound | null>(activeRound)
+  useEffect(() => { betRoundRef.current = betRound }, [betRound])
+
   const chatEndRef = useRef<HTMLDivElement>(null)
   const hasLeft = useRef(false)
 
@@ -475,6 +505,16 @@ export default function SpectateRoom({
     const interval = setInterval(tick, 500)
     return () => clearInterval(interval)
   }, [match.betting_closes_at])
+
+  // Extra round countdown timer
+  useEffect(() => {
+    if (!betRound) { setRoundSecondsLeft(0); return }
+    const closesAt = new Date(betRound.closes_at).getTime()
+    const tick = () => setRoundSecondsLeft(Math.max(0, Math.ceil((closesAt - Date.now()) / 1000)))
+    tick()
+    const interval = setInterval(tick, 500)
+    return () => clearInterval(interval)
+  }, [betRound])
 
   // Join spectate on mount
   useEffect(() => {
@@ -552,8 +592,14 @@ export default function SpectateRoom({
         filter: `match_id=eq.${match.id}`,
       }, (payload) => {
         const bet = payload.new as any
-        if (bet.status === 'open') {
+        if (bet.status !== 'open') return
+        if (!bet.round_id) {
           setBetTotals(prev => ({
+            ...prev,
+            [bet.bet_on]: (prev[bet.bet_on] ?? 0) + bet.amount,
+          }))
+        } else if (bet.round_id === betRoundRef.current?.id) {
+          setRoundBetTotals(prev => ({
             ...prev,
             [bet.bet_on]: (prev[bet.bet_on] ?? 0) + bet.amount,
           }))
@@ -566,15 +612,36 @@ export default function SpectateRoom({
         const bet = payload.new as any
         // Update myBet if it's mine
         if (bet.user_id === userId) {
-          setMyBet(bet as MatchBet)
+          if (!bet.round_id) setMyBet(bet as MatchBet)
+          else if (bet.round_id === betRoundRef.current?.id) setMyRoundBet(bet as MatchBet)
         }
         // Rebuild totals from DB on any update (resolve/refund)
         if (bet.status !== 'open') {
-          setBetTotals(prev => ({
-            ...prev,
-            [bet.bet_on]: Math.max(0, (prev[bet.bet_on] ?? 0) - bet.amount),
-          }))
+          if (!bet.round_id) {
+            setBetTotals(prev => ({
+              ...prev,
+              [bet.bet_on]: Math.max(0, (prev[bet.bet_on] ?? 0) - bet.amount),
+            }))
+          } else if (bet.round_id === betRoundRef.current?.id) {
+            setRoundBetTotals(prev => ({
+              ...prev,
+              [bet.bet_on]: Math.max(0, (prev[bet.bet_on] ?? 0) - bet.amount),
+            }))
+          }
         }
+      })
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'bet_rounds',
+        filter: `match_id=eq.${match.id}`,
+      }, (payload) => {
+        const round = payload.new as BetRound
+        setBetRound(round)
+        setRoundBetTotals({})
+        setMyRoundBet(null)
+        setRoundBetTarget(null)
+        setRoundBetError(null)
+        setShowNewRoundBanner(true)
+        setTimeout(() => setShowNewRoundBanner(false), 5000)
       })
       .subscribe()
 
@@ -654,7 +721,48 @@ export default function SpectateRoom({
     }
   }
 
+  const handlePlaceRoundBet = async () => {
+    if (!roundBetTarget || placingRoundBet || myRoundBet || !betRound) return
+    const amount = parseInt(roundBetAmount, 10)
+    if (isNaN(amount) || amount < 10 || amount > 1000) {
+      setRoundBetError('El monto debe estar entre 10 y 1000 pts')
+      return
+    }
+    if (amount > myPoints) {
+      setRoundBetError('Puntos insuficientes')
+      return
+    }
+    setRoundBetError(null)
+    setPlacingRoundBet(true)
+    try {
+      const { data, error } = await (supabase as any).rpc('place_bet', {
+        p_match_id: match.id,
+        p_bet_on: roundBetTarget,
+        p_amount: amount,
+      })
+      if (error || data?.error) {
+        const code = data?.error ?? error?.message
+        const msgs: Record<string, string> = {
+          betting_window_closed: 'La ronda de apuestas ya cerró',
+          already_bet: 'Ya apostaste en esta ronda',
+          insufficient_points: 'Puntos insuficientes',
+          invalid_amount: 'Monto inválido (10–1000)',
+          invalid_bet_target: 'Jugador inválido',
+          not_authenticated: 'Debes iniciar sesión',
+        }
+        setRoundBetError(msgs[code] ?? 'Error al apostar')
+        return
+      }
+      setMyRoundBet({ bet_on: roundBetTarget, amount, status: 'open', payout: 0, round_id: betRound.id })
+      setMyPoints(prev => prev - amount)
+      setRoundBetTotals(prev => ({ ...prev, [roundBetTarget]: (prev[roundBetTarget] ?? 0) + amount }))
+    } finally {
+      setPlacingRoundBet(false)
+    }
+  }
+
   const bettingOpen = !!match.betting_closes_at && bettingSecondsLeft > 0
+  const roundBettingOpen = !!betRound && roundSecondsLeft > 0
 
   const totalVotes = Object.values(voteCounts).reduce((a, b) => a + b, 0)
   const p1Votes = voteCounts[match.player1_id] ?? 0
@@ -731,6 +839,59 @@ export default function SpectateRoom({
             formatTime={formatTime}
           />
       }
+
+      {/* ── Ronda extra de apuestas ─────────────────────────────────────── */}
+      {showNewRoundBanner && betRound && (
+        <div className="new-round-banner relative overflow-hidden bg-[#111] border-2 border-[#e85d24] rounded-2xl px-5 py-4 flex items-center justify-center gap-3">
+          <style>{`
+            @keyframes new-round-pop {
+              0%   { transform: scale(0.5) translateY(-12px); opacity: 0; }
+              55%  { transform: scale(1.07) translateY(0); opacity: 1; }
+              100% { transform: scale(1) translateY(0); opacity: 1; }
+            }
+            @keyframes new-round-glow {
+              0%, 100% { box-shadow: 0 0 18px rgba(232,93,36,0.35); }
+              50%      { box-shadow: 0 0 48px rgba(232,93,36,0.8); }
+            }
+            @keyframes new-round-shine {
+              0%   { transform: translateX(-120%) skewX(-15deg); }
+              100% { transform: translateX(320%) skewX(-15deg); }
+            }
+            .new-round-banner { animation: new-round-pop 0.5s cubic-bezier(0.22, 1.2, 0.36, 1) both, new-round-glow 1.4s ease-in-out infinite 0.5s; }
+            .new-round-shine  { animation: new-round-shine 1.6s ease-in-out infinite 0.4s; }
+          `}</style>
+          <div className="new-round-shine absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-[#e85d24]/20 to-transparent pointer-events-none" />
+          <TrendingUp size={20} className="text-[#e85d24] flex-shrink-0" />
+          <p className="text-center">
+            <span className="text-[#e85d24] font-black text-lg tracking-wide">¡NUEVA RONDA DE APUESTAS!</span>
+            <span className="block text-[#888] text-xs mt-0.5">Ronda #{betRound.round_number} · {roundSecondsLeft}s para apostar</span>
+          </p>
+          <Coins size={20} className="text-[#e85d24] flex-shrink-0" />
+        </div>
+      )}
+
+      {roundBettingOpen && !isCompleted && betRound && (
+        <BettingPanel
+          match={match}
+          title={`Ronda #${betRound.round_number} · Apuestas en vivo`}
+          p1Name={p1Name}
+          p2Name={p2Name}
+          player1Id={match.player1_id}
+          player2Id={match.player2_id}
+          bettingOpen={roundBettingOpen}
+          bettingSecondsLeft={roundSecondsLeft}
+          betTotals={roundBetTotals}
+          myBet={myRoundBet}
+          myPoints={myPoints}
+          betTarget={roundBetTarget}
+          setBetTarget={setRoundBetTarget}
+          betAmount={roundBetAmount}
+          setBetAmount={setRoundBetAmount}
+          betError={roundBetError}
+          placingBet={placingRoundBet}
+          onPlaceBet={handlePlaceRoundBet}
+        />
+      )}
 
       {/* ── Betting panel ───────────────────────────────────────────────── */}
       {match.betting_closes_at && (

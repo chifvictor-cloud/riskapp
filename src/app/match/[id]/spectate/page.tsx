@@ -30,8 +30,9 @@ export default async function SpectatePage({ params }: { params: Promise<{ id: s
     { data: messagesRaw },
     { data: sponsorsRaw },
     { data: betsRaw },
-    { data: myBetRaw },
+    { data: myBetsRaw },
     { data: myProfileRaw },
+    { data: activeRoundRaw },
   ] = await Promise.all([
     supabase.from('tournaments').select('*').eq('id', match.tournament_id).single(),
     supabase
@@ -63,15 +64,22 @@ export default async function SpectatePage({ params }: { params: Promise<{ id: s
       .eq('status', 'active'),
     (supabase as any)
       .from('match_bets')
-      .select('bet_on, amount, status')
+      .select('bet_on, amount, status, round_id')
       .eq('match_id', id),
     (supabase as any)
       .from('match_bets')
-      .select('bet_on, amount, status, payout')
+      .select('bet_on, amount, status, payout, round_id')
       .eq('match_id', id)
-      .eq('user_id', user.id)
-      .maybeSingle(),
+      .eq('user_id', user.id),
     supabase.from('profiles').select('points').eq('id', user.id).single(),
+    (supabase as any)
+      .from('bet_rounds')
+      .select('id, round_number, closes_at')
+      .eq('match_id', id)
+      .gt('closes_at', new Date().toISOString())
+      .order('round_number', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   if (!tournamentRaw) notFound()
@@ -83,8 +91,12 @@ export default async function SpectatePage({ params }: { params: Promise<{ id: s
   const messages = ((messagesRaw ?? []) as any[]).reverse()
   const sponsors = (sponsorsRaw ?? []) as any[]
   const allBets = (betsRaw ?? []) as any[]
-  const myBet = myBetRaw as any ?? null
+  const myBets = (myBetsRaw ?? []) as any[]
   const myPoints = (myProfileRaw as any)?.points ?? 0
+  const activeRound = (activeRoundRaw as any) ?? null
+
+  const myBet = myBets.find(b => !b.round_id) ?? null
+  const myRoundBet = activeRound ? (myBets.find(b => b.round_id === activeRound.id) ?? null) : null
 
   // Compute vote counts
   const voteCounts: Record<string, number> = {}
@@ -92,11 +104,15 @@ export default async function SpectatePage({ params }: { params: Promise<{ id: s
     if (s.voted_for) voteCounts[s.voted_for] = (voteCounts[s.voted_for] ?? 0) + 1
   }
 
-  // Compute initial bet totals per player
+  // Compute bet totals per player — separate pots: initial window (round_id null) vs active round
   const initialBetTotals: Record<string, number> = {}
+  const initialRoundBetTotals: Record<string, number> = {}
   for (const b of allBets) {
-    if (b.status === 'open') {
+    if (b.status !== 'open') continue
+    if (!b.round_id) {
       initialBetTotals[b.bet_on] = (initialBetTotals[b.bet_on] ?? 0) + b.amount
+    } else if (activeRound && b.round_id === activeRound.id) {
+      initialRoundBetTotals[b.bet_on] = (initialRoundBetTotals[b.bet_on] ?? 0) + b.amount
     }
   }
 
@@ -125,6 +141,9 @@ export default async function SpectatePage({ params }: { params: Promise<{ id: s
           initialBetTotals={initialBetTotals}
           myBet={myBet}
           myPoints={myPoints}
+          activeRound={activeRound}
+          initialRoundBetTotals={initialRoundBetTotals}
+          myRoundBet={myRoundBet}
         />
       </main>
     </div>

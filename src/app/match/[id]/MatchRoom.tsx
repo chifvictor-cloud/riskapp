@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { submitMatchResult } from './actions'
 import {
   Clock, Trophy, AlertCircle, Upload, CheckCircle2,
-  Hourglass, ShieldAlert, Crown, ImageIcon, X,
+  Hourglass, ShieldAlert, Crown, ImageIcon, X, Coins,
 } from 'lucide-react'
 import type { Database } from '@/types/database'
 
@@ -21,6 +21,12 @@ interface Props {
   player1: Participant
   player2: Participant
   userId: string | null
+}
+
+interface BetRound {
+  id: string
+  round_number: number
+  closes_at: string
 }
 
 function formatElapsed(s: number) {
@@ -89,6 +95,10 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [resultStatus, setResultStatus] = useState<'pending_opponent' | 'completed' | 'disputed' | null>(null)
+  const [openRound, setOpenRound] = useState<BetRound | null>(null)
+  const [roundSecondsLeft, setRoundSecondsLeft] = useState(0)
+  const [openingRound, setOpeningRound] = useState(false)
+  const [openRoundError, setOpenRoundError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
@@ -117,9 +127,44 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
       }, (payload) => {
         setMatch(prev => ({ ...prev, ...(payload.new as Match) }))
       })
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'bet_rounds',
+        filter: `match_id=eq.${match.id}`,
+      }, (payload) => {
+        setOpenRound(payload.new as BetRound)
+      })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [match.id])
+
+  // Fetch currently open bet round on mount
+  useEffect(() => {
+    ;(async () => {
+      const { data } = await (supabase as any)
+        .from('bet_rounds')
+        .select('id, round_number, closes_at')
+        .eq('match_id', match.id)
+        .gt('closes_at', new Date().toISOString())
+        .order('round_number', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (data) setOpenRound(data as BetRound)
+    })()
+  }, [match.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Open round countdown
+  useEffect(() => {
+    if (!openRound) { setRoundSecondsLeft(0); return }
+    const closesAt = new Date(openRound.closes_at).getTime()
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((closesAt - Date.now()) / 1000))
+      setRoundSecondsLeft(left)
+      if (left <= 0) setOpenRound(null)
+    }
+    tick()
+    const interval = setInterval(tick, 500)
+    return () => clearInterval(interval)
+  }, [openRound])
 
   // Preview selected file
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,6 +209,29 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
         setResultStatus(result.resultStatus)
       }
     })
+  }
+
+  const handleOpenRound = async () => {
+    if (openingRound || openRound) return
+    setOpenRoundError(null)
+    setOpeningRound(true)
+    try {
+      const { data, error } = await (supabase as any).rpc('open_bet_round', { p_match_id: match.id })
+      if (error || data?.error) {
+        const code = data?.error ?? error?.message
+        const msgs: Record<string, string> = {
+          not_authorized: 'Solo los jugadores de esta partida pueden abrir rondas',
+          match_not_in_progress: 'La partida no está en curso',
+          round_already_open: 'Ya hay una ronda abierta',
+          match_not_found: 'Partida no encontrada',
+        }
+        setOpenRoundError(msgs[code] ?? 'Error al abrir la ronda')
+        return
+      }
+      setOpenRound({ id: data.round_id, round_number: data.round_number, closes_at: data.closes_at })
+    } finally {
+      setOpeningRound(false)
+    }
   }
 
   const isLoading = uploading || isPending
@@ -250,6 +318,42 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
           claimedSelf={p2claimed ? p2claimed === player2.player_id : null}
         />
       </div>
+
+      {/* Rondas extra de apuestas — solo jugadores del match */}
+      {match.status === 'in_progress' && isParticipant && (
+        <div className="bg-[#111] border border-[#e85d24]/20 rounded-2xl p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 bg-[#e85d24]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Coins size={14} className="text-[#e85d24]" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-white font-bold text-sm">Rondas extra de apuestas</p>
+                <p className="text-[#555] text-xs">Abre una ventana de 90s para que los espectadores apuesten</p>
+              </div>
+            </div>
+            {openRound ? (
+              <div className="flex items-center gap-2 bg-[#e85d24]/10 border border-[#e85d24]/20 rounded-full px-3 py-1.5 flex-shrink-0">
+                <div className="w-1.5 h-1.5 bg-[#e85d24] rounded-full animate-pulse" />
+                <span className="text-[#e85d24] font-mono font-bold text-xs">
+                  Ronda #{openRound.round_number} · {roundSecondsLeft}s
+                </span>
+              </div>
+            ) : (
+              <button
+                onClick={handleOpenRound}
+                disabled={openingRound}
+                className="bg-[#e85d24] hover:bg-[#d04e1a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm px-4 py-2 rounded-xl transition-colors flex-shrink-0"
+              >
+                {openingRound ? 'Abriendo...' : 'Abrir ronda de apuestas'}
+              </button>
+            )}
+          </div>
+          {openRoundError && (
+            <p className="text-red-400 text-xs mt-2">{openRoundError}</p>
+          )}
+        </div>
+      )}
 
       {/* ── ACTION AREA ── */}
 
