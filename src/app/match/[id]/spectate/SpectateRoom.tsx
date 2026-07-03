@@ -592,6 +592,7 @@ export default function SpectateRoom({
         filter: `match_id=eq.${match.id}`,
       }, (payload) => {
         const bet = payload.new as any
+        if (bet.user_id === userId) return // already counted optimistically on place
         if (bet.status !== 'open') return
         if (!bet.round_id) {
           setBetTotals(prev => ({
@@ -709,6 +710,7 @@ export default function SpectateRoom({
           invalid_amount: 'Monto inválido (10–1000)',
           invalid_bet_target: 'Jugador inválido',
           not_authenticated: 'Debes iniciar sesión',
+          players_cannot_bet: 'Los jugadores no pueden apostar en su propia partida',
         }
         setBetError(msgs[code] ?? 'Error al apostar')
         return
@@ -749,6 +751,7 @@ export default function SpectateRoom({
           invalid_amount: 'Monto inválido (10–1000)',
           invalid_bet_target: 'Jugador inválido',
           not_authenticated: 'Debes iniciar sesión',
+          players_cannot_bet: 'Los jugadores no pueden apostar en su propia partida',
         }
         setRoundBetError(msgs[code] ?? 'Error al apostar')
         return
