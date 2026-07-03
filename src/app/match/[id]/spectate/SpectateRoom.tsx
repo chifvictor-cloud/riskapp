@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useTransition } from 'react'
+import { useState, useEffect, useRef, useTransition, type CSSProperties } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Eye, Send, Crown, Star, Clock, Trophy, MessageCircle, Coins, TrendingUp, Lock, ChevronDown } from 'lucide-react'
 import MisApuestas from '@/components/MisApuestas'
@@ -424,6 +424,35 @@ function BettingPanel({
   )
 }
 
+// Jingle corto tipo casino (arpegio ascendente C5-E5-G5-C6) con Web Audio API, sin assets externos
+function playNewRoundSound() {
+  try {
+    const Ctx = window.AudioContext ?? (window as any).webkitAudioContext
+    if (!Ctx) return
+    const ctx: AudioContext = new Ctx()
+    if (ctx.state === 'suspended') ctx.resume().catch(() => {})
+    const notes = [523.25, 659.25, 783.99, 1046.5]
+    notes.forEach((freq, i) => {
+      const t = ctx.currentTime + i * 0.09
+      const isLast = i === notes.length - 1
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = 'triangle'
+      osc.frequency.setValueAtTime(freq, t)
+      gain.gain.setValueAtTime(0, t)
+      gain.gain.linearRampToValueAtTime(isLast ? 0.22 : 0.15, t + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.001, t + (isLast ? 0.5 : 0.3))
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(t)
+      osc.stop(t + 0.55)
+    })
+    setTimeout(() => { ctx.close().catch(() => {}) }, 1200)
+  } catch {
+    // Autoplay bloqueado o Web Audio no disponible: el banner visual sigue funcionando
+  }
+}
+
 export default function SpectateRoom({
   match: initMatch,
   tournament,
@@ -476,6 +505,11 @@ export default function SpectateRoom({
   const [placingRoundBet, setPlacingRoundBet] = useState(false)
   const [roundBetError, setRoundBetError] = useState<string | null>(null)
   const [showNewRoundBanner, setShowNewRoundBanner] = useState(false)
+
+  // Dopamina sonora: suena junto con el banner de nueva ronda
+  useEffect(() => {
+    if (showNewRoundBanner) playNewRoundSound()
+  }, [showNewRoundBanner])
 
   // Los handlers realtime se crean una sola vez; el ref evita closures viejos sobre la ronda activa
   const betRoundRef = useRef<BetRound | null>(activeRound)
@@ -845,7 +879,7 @@ export default function SpectateRoom({
 
       {/* ── Ronda extra de apuestas ─────────────────────────────────────── */}
       {showNewRoundBanner && betRound && (
-        <div className="new-round-banner relative overflow-hidden bg-[#111] border-2 border-[#e85d24] rounded-2xl px-5 py-4 flex items-center justify-center gap-3">
+        <div className="relative">
           <style>{`
             @keyframes new-round-pop {
               0%   { transform: scale(0.5) translateY(-12px); opacity: 0; }
@@ -860,16 +894,46 @@ export default function SpectateRoom({
               0%   { transform: translateX(-120%) skewX(-15deg); }
               100% { transform: translateX(320%) skewX(-15deg); }
             }
-            .new-round-banner { animation: new-round-pop 0.5s cubic-bezier(0.22, 1.2, 0.36, 1) both, new-round-glow 1.4s ease-in-out infinite 0.5s; }
-            .new-round-shine  { animation: new-round-shine 1.6s ease-in-out infinite 0.4s; }
+            @keyframes new-round-flash {
+              0%   { opacity: 0; }
+              15%  { opacity: 1; }
+              100% { opacity: 0; }
+            }
+            @keyframes new-round-particle {
+              0%   { transform: translate(0, 0) scale(1); opacity: 0; }
+              12%  { opacity: 1; }
+              100% { transform: translate(var(--dx), var(--dy)) scale(0.2); opacity: 0; }
+            }
+            .new-round-banner   { animation: new-round-pop 0.5s cubic-bezier(0.22, 1.2, 0.36, 1) both, new-round-glow 1.4s ease-in-out infinite 0.5s; }
+            .new-round-shine    { animation: new-round-shine 1.6s ease-in-out infinite 0.4s; }
+            .new-round-flash    { animation: new-round-flash 0.8s ease-out both; }
+            .new-round-particle { animation: new-round-particle 1s ease-out var(--pdelay) both; }
           `}</style>
-          <div className="new-round-shine absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-[#e85d24]/20 to-transparent pointer-events-none" />
-          <TrendingUp size={20} className="text-[#e85d24] flex-shrink-0" />
-          <p className="text-center">
-            <span className="text-[#e85d24] font-black text-lg tracking-wide">¡NUEVA RONDA DE APUESTAS!</span>
-            <span className="block text-[#888] text-xs mt-0.5">Ronda #{betRound.round_number} · {roundSecondsLeft}s para apostar</span>
-          </p>
-          <Coins size={20} className="text-[#e85d24] flex-shrink-0" />
+          <div className="new-round-flash fixed inset-0 z-50 pointer-events-none bg-[radial-gradient(ellipse_at_center,rgba(232,93,36,0.3),transparent_70%)]" />
+          <div className="new-round-banner relative overflow-hidden bg-[#111] border-2 border-[#e85d24] rounded-2xl px-5 py-4 flex items-center justify-center gap-3">
+            <div className="new-round-shine absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-[#e85d24]/20 to-transparent pointer-events-none" />
+            <TrendingUp size={20} className="text-[#e85d24] flex-shrink-0" />
+            <p className="text-center">
+              <span className="text-[#e85d24] font-black text-lg tracking-wide">¡NUEVA RONDA DE APUESTAS!</span>
+              <span className="block text-[#888] text-xs mt-0.5">Ronda #{betRound.round_number} · {roundSecondsLeft}s para apostar</span>
+            </p>
+            <Coins size={20} className="text-[#e85d24] flex-shrink-0" />
+          </div>
+          <div className="absolute inset-0 pointer-events-none">
+            {Array.from({ length: 14 }, (_, i) => (
+              <span
+                key={i}
+                className="new-round-particle absolute bottom-2 h-1.5 w-1.5 rounded-full"
+                style={{
+                  left: `${7 + i * 6.5}%`,
+                  background: i % 3 === 0 ? '#f5b942' : '#e85d24',
+                  '--dx': `${(i % 2 === 0 ? 1 : -1) * (10 + ((i * 7) % 26))}px`,
+                  '--dy': `${-(44 + ((i * 13) % 40))}px`,
+                  '--pdelay': `${0.15 + (i % 5) * 0.09}s`,
+                } as CSSProperties}
+              />
+            ))}
+          </div>
         </div>
       )}
 
