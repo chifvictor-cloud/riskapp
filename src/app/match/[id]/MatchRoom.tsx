@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { submitMatchResult } from './actions'
 import {
   Clock, Trophy, AlertCircle, Upload, CheckCircle2,
-  Hourglass, ShieldAlert, Crown, ImageIcon, X, Coins,
+  Hourglass, ShieldAlert, ShieldCheck, Crown, ImageIcon, X, Coins,
 } from 'lucide-react'
 import type { Database } from '@/types/database'
 
@@ -27,6 +27,20 @@ interface BetRound {
   id: string
   round_number: number
   closes_at: string
+}
+
+interface Moderator {
+  id: string
+  user_id: string
+  role: 'marker' | 'backup'
+  status: 'proposed' | 'active'
+  assigned_by: string | null
+  username: string
+}
+
+const MOD_ROLE_LABEL: Record<Moderator['role'], string> = {
+  marker: 'Marcador',
+  backup: 'Respaldo',
 }
 
 function formatElapsed(s: number) {
@@ -99,6 +113,12 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
   const [roundSecondsLeft, setRoundSecondsLeft] = useState(0)
   const [openingRound, setOpeningRound] = useState(false)
   const [openRoundError, setOpenRoundError] = useState<string | null>(null)
+  const [mods, setMods] = useState<Moderator[]>([])
+  const [modEmail, setModEmail] = useState('')
+  const [modRole, setModRole] = useState<'marker' | 'backup'>('marker')
+  const [proposingMod, setProposingMod] = useState(false)
+  const [acceptingModId, setAcceptingModId] = useState<string | null>(null)
+  const [modError, setModError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
@@ -133,6 +153,12 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
       }, (payload) => {
         setOpenRound(payload.new as BetRound)
       })
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'match_moderators',
+        filter: `match_id=eq.${match.id}`,
+      }, () => {
+        fetchMods()
+      })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [match.id])
@@ -150,6 +176,31 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
         .maybeSingle()
       if (data) setOpenRound(data as BetRound)
     })()
+  }, [match.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch moderators (con username desde profiles)
+  const fetchMods = async () => {
+    const { data } = await (supabase as any)
+      .from('match_moderators')
+      .select('id, user_id, role, status, assigned_by')
+      .eq('match_id', match.id)
+      .neq('status', 'removed')
+      .order('created_at', { ascending: true })
+    if (!data) return
+    const userIds = [...new Set(data.map((m: any) => m.user_id))]
+    const profileMap: Record<string, string> = {}
+    if (userIds.length > 0) {
+      const { data: profiles } = await (supabase as any)
+        .from('profiles')
+        .select('id, username, display_name')
+        .in('id', userIds)
+      for (const p of (profiles ?? []) as any[]) profileMap[p.id] = p.display_name || p.username
+    }
+    setMods(data.map((m: any) => ({ ...m, username: profileMap[m.user_id] ?? '?' })))
+  }
+
+  useEffect(() => {
+    fetchMods()
   }, [match.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Open round countdown
@@ -234,6 +285,64 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
     }
   }
 
+  const handleProposeMod = async () => {
+    const email = modEmail.trim()
+    if (!email || proposingMod) return
+    setModError(null)
+    setProposingMod(true)
+    try {
+      const { data, error } = await (supabase as any).rpc('propose_moderator', {
+        p_match_id: match.id,
+        p_mod_email: email,
+        p_role: modRole,
+      })
+      if (error || data?.error) {
+        const code = data?.error ?? error?.message
+        const msgs: Record<string, string> = {
+          match_not_found: 'Partida no encontrada',
+          not_authorized: 'Solo los jugadores de la partida pueden proponer moderadores',
+          match_not_active: 'La partida ya no admite moderadores',
+          invalid_role: 'Rol inválido',
+          user_not_found: 'No existe un usuario con ese correo',
+          mod_cannot_be_player: 'El moderador no puede ser jugador de la partida',
+          already_proposed: 'Ese usuario ya fue propuesto como moderador',
+        }
+        setModError(msgs[code] ?? 'Error al proponer moderador')
+        return
+      }
+      setModEmail('')
+      fetchMods()
+    } finally {
+      setProposingMod(false)
+    }
+  }
+
+  const handleAcceptMod = async (moderatorId: string) => {
+    if (acceptingModId) return
+    setModError(null)
+    setAcceptingModId(moderatorId)
+    try {
+      const { data, error } = await (supabase as any).rpc('accept_moderator', {
+        p_moderator_id: moderatorId,
+      })
+      if (error || data?.error) {
+        const code = data?.error ?? error?.message
+        const msgs: Record<string, string> = {
+          not_found: 'Propuesta no encontrada',
+          not_pending: 'Esta propuesta ya no está pendiente',
+          not_authorized: 'Solo los jugadores de la partida pueden aceptar la propuesta',
+          cannot_accept_own_proposal: 'El otro jugador debe aceptar la propuesta',
+          marker_already_active: 'Ya hay un marcador activo en esta partida',
+        }
+        setModError(msgs[code] ?? 'Error al aceptar la propuesta')
+        return
+      }
+      fetchMods()
+    } finally {
+      setAcceptingModId(null)
+    }
+  }
+
   const isLoading = uploading || isPending
 
   // --- Status derivations ---
@@ -255,6 +364,9 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
   }[match.status] ?? ''
 
   const winner = match.winner_id === player1.player_id ? player1 : match.winner_id === player2.player_id ? player2 : null
+
+  const activeMods = mods.filter(m => m.status === 'active')
+  const proposedMods = mods.filter(m => m.status === 'proposed')
 
   return (
     <div className="space-y-5">
@@ -318,6 +430,87 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
           claimedSelf={p2claimed ? p2claimed === player2.player_id : null}
         />
       </div>
+
+      {/* Moderador del match — solo jugadores, pending o in_progress */}
+      {(match.status === 'pending' || match.status === 'in_progress') && isParticipant && (
+        <div className="bg-[#111] border border-[#e85d24]/20 rounded-2xl p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-[#e85d24]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <ShieldCheck size={14} className="text-[#e85d24]" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-white font-bold text-sm">Moderador del match</p>
+              <p className="text-[#555] text-xs">Un tercero verifica el resultado de la partida</p>
+            </div>
+          </div>
+
+          {/* Mods activos */}
+          {activeMods.map(mod => (
+            <div key={mod.id} className="flex items-center gap-2 bg-[#e85d24]/10 border border-[#e85d24]/20 rounded-xl px-3 py-2">
+              <ShieldCheck size={13} className="text-[#e85d24] flex-shrink-0" />
+              <span className="text-white font-bold text-sm truncate">Mod: {mod.username} ✓</span>
+              <span className="ml-auto text-[#e85d24] text-xs font-bold flex-shrink-0">{MOD_ROLE_LABEL[mod.role]}</span>
+            </div>
+          ))}
+
+          {/* Propuestas pendientes */}
+          {proposedMods.map(mod => (
+            <div key={mod.id} className="flex items-center gap-2 bg-[#0a0a0a] border border-[#222] rounded-xl px-3 py-2">
+              <Hourglass size={12} className="text-[#888] flex-shrink-0" />
+              <span className="text-[#888] text-sm min-w-0 truncate">
+                Propuesto: <span className="text-white font-bold">{mod.username}</span>
+                <span className="text-[#555]"> · {MOD_ROLE_LABEL[mod.role]} · esperando confirmación</span>
+              </span>
+              {mod.assigned_by !== userId && (
+                <button
+                  onClick={() => handleAcceptMod(mod.id)}
+                  disabled={acceptingModId === mod.id}
+                  className="ml-auto bg-[#e85d24] hover:bg-[#d04e1a] disabled:opacity-40 text-white font-bold text-xs px-3 py-1.5 rounded-lg transition-colors flex-shrink-0"
+                >
+                  {acceptingModId === mod.id ? 'Aceptando...' : 'Aceptar'}
+                </button>
+              )}
+            </div>
+          ))}
+
+          {/* Formulario — solo cuando no hay ningún mod */}
+          {mods.length === 0 && (
+            <div className="space-y-2">
+              <input
+                type="email"
+                value={modEmail}
+                onChange={e => setModEmail(e.target.value)}
+                placeholder="Correo del moderador"
+                className="w-full bg-[#0a0a0a] border border-[#222] focus:border-[#e85d24] rounded-lg px-3 py-2.5 text-white placeholder-[#444] outline-none text-sm transition-colors"
+              />
+              <div className="flex gap-2">
+                {([['marker', 'Marcador'], ['backup', 'Respaldo']] as const).map(([value, label]) => (
+                  <button
+                    key={value}
+                    onClick={() => setModRole(value)}
+                    className={`flex-1 rounded-lg border py-2 text-xs font-bold transition-colors ${
+                      modRole === value
+                        ? 'border-[#e85d24] bg-[#e85d24]/10 text-[#e85d24]'
+                        : 'border-[#222] bg-[#0a0a0a] text-[#888] hover:border-[#e85d24]/40'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleProposeMod}
+                disabled={!modEmail.trim() || proposingMod}
+                className="w-full bg-[#e85d24] hover:bg-[#d04e1a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-2.5 rounded-xl text-sm transition-colors"
+              >
+                {proposingMod ? 'Proponiendo...' : 'Proponer moderador'}
+              </button>
+            </div>
+          )}
+
+          {modError && <p className="text-red-400 text-xs">{modError}</p>}
+        </div>
+      )}
 
       {/* Rondas extra de apuestas — solo jugadores del match */}
       {match.status === 'in_progress' && isParticipant && (

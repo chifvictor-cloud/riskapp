@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition, type CSSProperties } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Eye, Send, Crown, Star, Clock, Trophy, MessageCircle, Coins, TrendingUp, Lock, ChevronDown } from 'lucide-react'
+import { Eye, Send, Crown, Star, Clock, Trophy, MessageCircle, Coins, TrendingUp, Lock, ChevronDown, ShieldCheck } from 'lucide-react'
 import MisApuestas from '@/components/MisApuestas'
 
 interface Player {
@@ -484,6 +484,7 @@ export default function SpectateRoom({
   const [isPending, startTransition] = useTransition()
 
   const [showMyBets, setShowMyBets] = useState(false)
+  const [verifiedBy, setVerifiedBy] = useState<string | null>(null)
 
   // Betting state
   const [betTotals, setBetTotals] = useState<Record<string, number>>(initialBetTotals)
@@ -566,6 +567,25 @@ export default function SpectateRoom({
       handleLeave()
       window.removeEventListener('beforeunload', handleLeave)
     }
+  }, [match.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Mod activo del match → badge "Verificado por"
+  useEffect(() => {
+    ;(async () => {
+      const { data } = await (supabase as any)
+        .from('match_moderators')
+        .select('user_id, role')
+        .eq('match_id', match.id)
+        .eq('status', 'active')
+      if (!data?.length) return
+      const mod = data.find((m: any) => m.role === 'marker') ?? data[0]
+      const { data: profile } = await (supabase as any)
+        .from('profiles')
+        .select('username')
+        .eq('id', mod.user_id)
+        .single()
+      if (profile) setVerifiedBy(profile.username)
+    })()
   }, [match.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Realtime: match updates
@@ -745,6 +765,7 @@ export default function SpectateRoom({
           invalid_bet_target: 'Jugador inválido',
           not_authenticated: 'Debes iniciar sesión',
           players_cannot_bet: 'Los jugadores no pueden apostar en su propia partida',
+          mods_cannot_bet: 'Los moderadores no pueden apostar en la partida que moderan',
         }
         setBetError(msgs[code] ?? 'Error al apostar')
         return
@@ -786,6 +807,7 @@ export default function SpectateRoom({
           invalid_bet_target: 'Jugador inválido',
           not_authenticated: 'Debes iniciar sesión',
           players_cannot_bet: 'Los jugadores no pueden apostar en su propia partida',
+          mods_cannot_bet: 'Los moderadores no pueden apostar en la partida que moderan',
         }
         setRoundBetError(msgs[code] ?? 'Error al apostar')
         return
@@ -840,6 +862,11 @@ export default function SpectateRoom({
             {p1Name} <span className="text-[#555]">vs</span> {p2Name}
           </h1>
           <p className="text-[#555] text-xs mt-0.5">{tournament.game_mode} · {tournament.title}</p>
+          {verifiedBy && (
+            <span className="inline-flex items-center gap-1 mt-1 text-[10px] text-[#e85d24] bg-[#e85d24]/10 border border-[#e85d24]/20 px-2 py-0.5 rounded-full">
+              <ShieldCheck size={10} /> Verificado por: {verifiedBy}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-4 flex-shrink-0">
