@@ -459,9 +459,13 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
               <Hourglass size={12} className="text-[#888] flex-shrink-0" />
               <span className="text-[#888] text-sm min-w-0 truncate">
                 Propuesto: <span className="text-white font-bold">{mod.username}</span>
-                <span className="text-[#555]"> · {MOD_ROLE_LABEL[mod.role]} · esperando confirmación</span>
+                <span className="text-[#555]"> · {MOD_ROLE_LABEL[mod.role]} · propuesto por {
+                  mod.assigned_by === player1.player_id
+                    ? (player1.profiles?.display_name || player1.profiles?.username || 'J1')
+                    : (player2.profiles?.display_name || player2.profiles?.username || 'J2')
+                }</span>
               </span>
-              {mod.assigned_by !== userId && (
+              {mod.assigned_by !== userId ? (
                 <button
                   onClick={() => handleAcceptMod(mod.id)}
                   disabled={acceptingModId === mod.id}
@@ -469,6 +473,8 @@ export default function MatchRoom({ match: initMatch, tournament, player1, playe
                 >
                   {acceptingModId === mod.id ? 'Aceptando...' : 'Aceptar'}
                 </button>
+              ) : (
+                <span className="ml-auto text-[#555] text-xs flex-shrink-0">Tu rival debe aceptar</span>
               )}
             </div>
           ))}
