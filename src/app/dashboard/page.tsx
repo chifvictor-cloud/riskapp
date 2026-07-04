@@ -1,6 +1,7 @@
 ﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Navbar from '@/components/Navbar'
+import PartnerPanel from '@/components/PartnerPanel'
 import Link from 'next/link'
 import { Trophy, Wallet, TrendingUp, Plus, ChevronRight, Target, Swords, Star } from 'lucide-react'
 import type { Database } from '@/types/database'
@@ -16,6 +17,7 @@ export default async function DashboardPage() {
     { data: profile },
     { data: recentMatches },
     { data: activeTournaments },
+    { data: referralStatsRaw },
   ] = await Promise.all([
     supabase
       .from('profiles')
@@ -45,7 +47,13 @@ export default async function DashboardPage() {
       .in('status', ['registered', 'playing'])
       .order('joined_at', { ascending: false })
       .limit(4),
+
+    (supabase as any).rpc('get_my_referral_stats'),
   ])
+
+  // El RPC puede regresar objeto o fila única como array según su definición
+  const referralStats = (Array.isArray(referralStatsRaw) ? referralStatsRaw[0] : referralStatsRaw) as
+    { code: string | null; total_signups: number; qualified: number } | null
 
   const totalMatches = (profile?.wins ?? 0) + (profile?.losses ?? 0)
   const winRate = totalMatches > 0
@@ -301,6 +309,15 @@ export default async function DashboardPage() {
                 Editar perfil
               </Link>
             </div>
+
+            {/* Programa de partners — solo si el usuario tiene referral_code */}
+            {referralStats?.code && (
+              <PartnerPanel
+                code={referralStats.code}
+                totalSignups={referralStats.total_signups ?? 0}
+                qualified={referralStats.qualified ?? 0}
+              />
+            )}
           </div>
         </div>
       </main>

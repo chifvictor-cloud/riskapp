@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import ReferralTracker from "@/components/ReferralTracker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="es" className="h-full">
       <body className={`${inter.className} min-h-full bg-[#08071a] text-[#f5f5f5] antialiased`}>
+        <ReferralTracker />
         {children}
       </body>
     </html>
