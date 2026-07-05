@@ -67,6 +67,9 @@ export default function Navbar() {
                 <Link href="/dashboard" className="text-[#888] hover:text-white transition-colors text-sm font-medium">
                   Dashboard
                 </Link>
+                <Link href="/mis-apuestas" className="text-[#888] hover:text-white transition-colors text-sm font-medium">
+                  Mis apuestas
+                </Link>
                 <Link href="/store" className="flex items-center gap-1.5 text-[#888] hover:text-white transition-colors text-sm font-medium">
                   <ShoppingBag size={13} />
                   Tienda
@@ -149,6 +152,7 @@ export default function Navbar() {
           {user ? (
             <>
               <Link href="/dashboard" className="block text-[#888] hover:text-white py-2">Dashboard</Link>
+              <Link href="/mis-apuestas" className="block text-[#888] hover:text-white py-2">Mis apuestas</Link>
               <Link href="/store" className="block text-[#888] hover:text-white py-2">Tienda</Link>
               <Link href="/deposit" className="block text-[#8b5cf6] font-semibold py-2">+ Depositar</Link>
               <Link href="/withdraw" className="block text-[#888] hover:text-white py-2">Retirar</Link>
