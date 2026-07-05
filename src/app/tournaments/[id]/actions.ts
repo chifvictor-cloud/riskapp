@@ -34,21 +34,6 @@ export async function joinTournament(tournamentId: string, epicUsername: string)
   }
 }
 
-export async function reportMatchResult(matchId: string, winnerId: string) {
-  const supabase = await createClient()
-  const { data, error } = await (supabase as any).rpc('report_match_result', {
-    p_match_id: matchId,
-    p_winner_id: winnerId,
-  })
-
-  if (error) return { error: error.message as string }
-  if (data?.error) return { error: data.error as string }
-
-  revalidatePath('/tournaments')
-  revalidatePath('/dashboard')
-  return { success: true as const, prize: data?.prize as number }
-}
-
 export async function createTournament(
   entryFee: number,
   gameMode: string,

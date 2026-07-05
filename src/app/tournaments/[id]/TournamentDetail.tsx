@@ -3,8 +3,8 @@
 import { useState, useEffect, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { joinTournament, reportMatchResult } from './actions'
-import { sponsorPlayer } from '@/app/match/[id]/actions'
+import { joinTournament } from './actions'
+import { sponsorPlayer, submitMatchResult } from '@/app/match/[id]/actions'
 import { Users, Trophy, AlertCircle, Clock, Swords, Crown, Gamepad2, X, Eye, Star } from 'lucide-react'
 import Link from 'next/link'
 import type { Database } from '@/types/database'
@@ -163,6 +163,8 @@ export default function TournamentDetail({ tournament: init, participants: initP
   const [match, setMatch] = useState(initM)
   const [sponsors, setSponsors] = useState(initSponsors)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
+  const [hasReported, setHasReported] = useState(false)
   const [reportingResult, setReportingResult] = useState(false)
   const [sponsoring, setSponsoring] = useState(false)
   const [isPending, startTransition] = useTransition()
@@ -282,12 +284,21 @@ export default function TournamentDetail({ tournament: init, participants: initP
   const handleReportResult = (winnerId: string) => {
     if (!match) return
     setError(null)
+    setNotice(null)
     setReportingResult(false)
     startTransition(async () => {
-      const result = await reportMatchResult(match.id, winnerId)
+      const result = await submitMatchResult(match.id, winnerId, null)
       if ('error' in result) {
         setError(result.error ?? 'Error al reportar resultado')
+        return
       }
+      setHasReported(true)
+      if (result.resultStatus === 'pending_opponent') {
+        setNotice('Resultado enviado. Esperando que tu rival confirme para liberar el premio.')
+      } else if (result.resultStatus === 'disputed') {
+        setNotice('Los reportes no coinciden. Un administrador revisará el caso.')
+      }
+      // 'completed' → el realtime actualiza el match; no hace falta aviso
     })
   }
 
@@ -314,6 +325,14 @@ export default function TournamentDetail({ tournament: init, participants: initP
             <button onClick={() => setError(null)} className="ml-auto text-red-400/60 hover:text-red-400">
               <X size={14} />
             </button>
+          </div>
+        )}
+
+        {/* Notice (pendiente de rival / disputa) */}
+        {notice && (
+          <div className="flex items-center gap-2 bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 rounded-xl px-4 py-3">
+            <Clock size={15} className="text-[#8b5cf6] flex-shrink-0" />
+            <p className="text-[#8b5cf6] text-sm">{notice}</p>
           </div>
         )}
 
@@ -461,7 +480,7 @@ export default function TournamentDetail({ tournament: init, participants: initP
             )}
 
             {/* IN_PROGRESS — report result */}
-            {isActiveMatch && !match?.winner_id && (
+            {isActiveMatch && !match?.winner_id && !hasReported && (
               <div className="bg-[#0d0c26] border border-[#8b5cf6]/20 rounded-2xl p-5">
                 <h3 className="text-white font-bold mb-1 flex items-center gap-2">
                   <Trophy size={15} className="text-[#8b5cf6]" />
