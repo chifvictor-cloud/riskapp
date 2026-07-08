@@ -8,11 +8,12 @@ import {
   Hourglass, ShieldAlert, ShieldCheck, Crown, ImageIcon, X, Coins,
 } from 'lucide-react'
 import type { Database } from '@/types/database'
+import PlayerFrame from '@/components/PlayerFrame'
 
 type Match = Database['public']['Tables']['matches']['Row']
 type Tournament = Database['public']['Tables']['tournaments']['Row']
 
-interface Profile { id: string; username: string; display_name: string | null }
+interface Profile { id: string; username: string; display_name: string | null; frame_tier: number }
 interface Participant { player_id: string; epic_username: string | null; profiles: Profile | null }
 
 interface Props {
@@ -66,11 +67,12 @@ function PlayerCard({
         : 'bg-[#0f0e2a] border-[#201e50]'
     }`}>
       <div className="relative">
-        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-black text-xl ${
-          isWinner ? 'bg-[#8b5cf6]' : isMe ? 'bg-[#201e50] border-2 border-[#8b5cf6]/40' : 'bg-[#2d2960]'
-        }`}>
+        <PlayerFrame
+          tier={participant.profiles?.frame_tier ?? 1}
+          className="w-14 h-14 flex items-center justify-center text-white font-black text-xl"
+        >
           {name[0].toUpperCase()}
-        </div>
+        </PlayerFrame>
         {isWinner && (
           <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center">
             <Crown size={10} className="text-yellow-900" />

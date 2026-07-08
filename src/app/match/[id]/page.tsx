@@ -24,7 +24,7 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
     supabase.from('tournaments').select('*').eq('id', match.tournament_id).single(),
     supabase
       .from('tournament_participants')
-      .select('player_id, epic_username, profiles(id, username, display_name)')
+      .select('player_id, epic_username, profiles(id, username, display_name, frame_tier)')
       .eq('tournament_id', match.tournament_id)
       .order('joined_at'),
   ])
