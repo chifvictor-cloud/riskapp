@@ -16,6 +16,8 @@ export type Database = {
           is_admin: boolean
           is_vip: boolean
           vip_expires_at: string | null
+          frame_tier: number
+          frame_unlocked_via: string
           created_at: string
           updated_at: string
         }

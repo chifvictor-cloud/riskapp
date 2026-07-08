@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Navbar from '@/components/Navbar'
 import PartnerPanel from '@/components/PartnerPanel'
+import PlayerFrame from '@/components/PlayerFrame'
 import Link from 'next/link'
 import { Trophy, Wallet, TrendingUp, Plus, ChevronRight, Target, Swords, Star } from 'lucide-react'
 import type { Database } from '@/types/database'
@@ -273,9 +274,12 @@ export default async function DashboardPage() {
             <div className="bg-[#0d0c26] border border-[#1e1b4b] rounded-2xl p-5">
               <h2 className="text-white font-bold text-base mb-4">Perfil</h2>
               <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#1e1b4b]">
-                <div className="w-12 h-12 rounded-full bg-[#8b5cf6] flex items-center justify-center text-white font-black text-lg flex-shrink-0">
+                <PlayerFrame
+                  tier={profile?.frame_tier ?? 1}
+                  className="w-12 h-12 flex items-center justify-center text-white font-black text-lg flex-shrink-0"
+                >
                   {(profile?.display_name || profile?.username || 'U')[0].toUpperCase()}
-                </div>
+                </PlayerFrame>
                 <div className="min-w-0">
                   <p className="text-white font-bold truncate">{profile?.display_name}</p>
                   <p className="text-[#555] text-xs">@{profile?.username}</p>
