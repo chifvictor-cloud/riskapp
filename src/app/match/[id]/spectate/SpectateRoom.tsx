@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useTransition, type CSSProperties } from '
 import { createClient } from '@/lib/supabase/client'
 import { Eye, Send, Crown, Star, Clock, Trophy, MessageCircle, Coins, TrendingUp, Lock, ChevronDown, ShieldCheck } from 'lucide-react'
 import MisApuestas from '@/components/MisApuestas'
+import PlayerFrame from '@/components/PlayerFrame'
 
 interface Player {
   player_id: string
@@ -15,6 +16,7 @@ interface Player {
     losses: number
     points: number
     is_vip: boolean
+    frame_tier: number
   } | null
 }
 
@@ -117,8 +119,8 @@ function MatchArena({
 }: {
   p1Name: string; p2Name: string
   p1EpicUsername: string | null; p2EpicUsername: string | null
-  p1Profile: { wins: number; losses: number; points: number } | null
-  p2Profile: { wins: number; losses: number; points: number } | null
+  p1Profile: { wins: number; losses: number; points: number; frame_tier: number } | null
+  p2Profile: { wins: number; losses: number; points: number; frame_tier: number } | null
   p1WR: number; p2WR: number
   prizePool: number; gameMode: string
   elapsed: number; formatTime: (s: number) => string
@@ -174,9 +176,9 @@ function MatchArena({
 
           {/* Player 1 */}
           <div className="flex-1 flex flex-col items-center text-center">
-            <div className="player-frame mb-3 w-[72px] h-[72px] rounded-full border-2 border-[#8b5cf6] bg-[#8b5cf6]/10 flex items-center justify-center shadow-[0_0_18px_rgba(139,92,246,0.35)] arena-float-1">
+            <PlayerFrame tier={p1Profile?.frame_tier ?? 1} className="mb-3 w-[72px] h-[72px] flex items-center justify-center arena-float-1">
               <span className="text-white font-black text-2xl select-none">{p1Name[0]?.toUpperCase()}</span>
-            </div>
+            </PlayerFrame>
             <p className="text-white font-bold text-sm leading-tight">{p1Name}</p>
             {p1EpicUsername && (
               <p className="text-[#8b5cf6] text-[11px] font-mono mt-0.5 truncate max-w-[110px]">{p1EpicUsername}</p>
@@ -200,9 +202,9 @@ function MatchArena({
 
           {/* Player 2 */}
           <div className="flex-1 flex flex-col items-center text-center">
-            <div className="player-frame mb-3 w-[72px] h-[72px] rounded-full border-2 border-[#3b82f6] bg-[#3b82f6]/10 flex items-center justify-center shadow-[0_0_18px_rgba(59,130,246,0.35)] arena-float-2">
+            <PlayerFrame tier={p2Profile?.frame_tier ?? 1} className="mb-3 w-[72px] h-[72px] flex items-center justify-center arena-float-2">
               <span className="text-white font-black text-2xl select-none">{p2Name[0]?.toUpperCase()}</span>
-            </div>
+            </PlayerFrame>
             <p className="text-white font-bold text-sm leading-tight">{p2Name}</p>
             {p2EpicUsername && (
               <p className="text-[#3b82f6] text-[11px] font-mono mt-0.5 truncate max-w-[110px]">{p2EpicUsername}</p>

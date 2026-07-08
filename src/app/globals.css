@@ -65,3 +65,63 @@ body {
 .card-hover:hover {
   box-shadow: 0 0 32px rgba(139,92,246,0.1), 0 0 0 1px rgba(139,92,246,0.25);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Marcos evolutivos de jugador (M1) — versión funcional.
+   Estas clases van SIN @layer a propósito: le ganan a los utilities
+   de Tailwind del wrapper (border-*, shadow-*) sin necesidad de
+   !important. Stitch las rediseña después.
+   ══════════════════════════════════════════════════════════════ */
+.player-frame {
+  position: relative;
+  border-radius: 9999px;
+}
+
+/* Tier 1 — Bronze: default, discreto */
+.player-frame-tier-1 {
+  border: 2px solid #a5713a;
+  background: rgba(165, 113, 58, 0.08);
+  box-shadow: 0 0 10px rgba(165, 113, 58, 0.35);
+}
+
+/* Tier 2 — Silver: frío, metálico */
+.player-frame-tier-2 {
+  border: 2px solid #c8d2df;
+  background: rgba(200, 210, 223, 0.08);
+  box-shadow: 0 0 14px rgba(200, 210, 223, 0.45);
+}
+
+/* Tier 3 — Gold: brillo cálido constante */
+.player-frame-tier-3 {
+  border: 2px solid #f5c518;
+  background: rgba(245, 197, 24, 0.08);
+  box-shadow: 0 0 18px rgba(245, 197, 24, 0.5), 0 0 36px rgba(245, 197, 24, 0.2);
+}
+
+/* Tier 4 — Diamond: cian con pulso */
+.player-frame-tier-4 {
+  border: 2px solid #67e8f9;
+  background: rgba(103, 232, 249, 0.08);
+  animation: frame-diamond-pulse 2.4s ease-in-out infinite;
+}
+@keyframes frame-diamond-pulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(103, 232, 249, 0.45), 0 0 32px rgba(103, 232, 249, 0.15); }
+  50%      { box-shadow: 0 0 26px rgba(103, 232, 249, 0.75), 0 0 52px rgba(103, 232, 249, 0.35); }
+}
+
+/* Tier 5 — Legendary: oro + violeta alternando, el más "dopamine" */
+.player-frame-tier-5 {
+  border: 2px solid #fbbf24;
+  background: rgba(251, 191, 36, 0.08);
+  animation: frame-legendary-glow 3s ease-in-out infinite;
+}
+@keyframes frame-legendary-glow {
+  0%, 100% {
+    border-color: #fbbf24;
+    box-shadow: 0 0 22px rgba(251, 191, 36, 0.65), 0 0 44px rgba(139, 92, 246, 0.25);
+  }
+  50% {
+    border-color: #a78bfa;
+    box-shadow: 0 0 22px rgba(139, 92, 246, 0.65), 0 0 44px rgba(251, 191, 36, 0.25);
+  }
+}

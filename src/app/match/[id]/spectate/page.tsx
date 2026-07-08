@@ -37,7 +37,7 @@ export default async function SpectatePage({ params }: { params: Promise<{ id: s
     supabase.from('tournaments').select('*').eq('id', match.tournament_id).single(),
     supabase
       .from('tournament_participants')
-      .select('*, profiles(username, display_name, wins, losses, points, is_vip)')
+      .select('*, profiles(username, display_name, wins, losses, points, is_vip, frame_tier)')
       .eq('tournament_id', match.tournament_id)
       .order('joined_at'),
     (supabase as any)
