@@ -62,6 +62,7 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 - Clase `player-frame` ya está reservada en `SpectateRoom.tsx`.
 - Precios pueden ajustarse con UPDATE simple después de ver comportamiento real.
 - M2 (subida de foto con Storage bucket) viene después de M1.
+- Marcos épicos animados (fuego, electricidad, sombras del inframundo, etc.) para tiers altos — genera FOMO, el flex ajeno vende. Va DESPUÉS de M1 funcional, junto con el rediseño Stitch (#9). No es CSS simple: requiere Lottie/SVG animado/canvas, con cuidado de performance en celular. La versión CSS actual es placeholder funcional a propósito.
 
 ### Completado y validado en producción
 - **Pari-mutuel (v10–v13, Capas 1–3C):** tabla `match_bets`, funciones `place_bet` / `resolve_bets` / `refund_bets`, ventana de 90s vía `betting_closes_at`, rake 5%, payout proporcional, reembolso completo si no hay ganador o se cancela. Modelo de fixed-odds descartado explícitamente.
