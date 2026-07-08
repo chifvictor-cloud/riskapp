@@ -33,7 +33,15 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 ---
 
 ### En curso
-**Marcos evolutivos de jugador — M1** (listo para arrancar, todas las decisiones cerradas).
+**Marcos evolutivos de jugador — M1** (avanzado; sesión 8-jul).
+
+**Estado al 8-jul:**
+- ✅ Migración v19 (`supabase/migration_v19.sql`) aplicada en producción y verificada por Victor (catálogo 5 tiers, backfill OK — todos en Bronze).
+- ✅ `PlayerFrame.tsx` + CSS de 5 tiers en `globals.css` (fuera de @layer a propósito para pisar utilities de Tailwind).
+- ✅ Integrado, aprobado y pusheado: SpectateRoom (`26fbda2`), MatchRoom (`f5b50e2`), Dashboard (`7fd5b3c`).
+- ⬜ Falta integrar: **perfil** y **ranking** (siguiente sesión, una a la vez).
+- ⬜ **UI de compra de tier no existe** — `buy_frame_tier` está viva en la DB pero ningún frontend la llama. Decidir dónde va (¿tienda? ¿perfil?) al integrar perfil.
+- Criterio visual acordado: el marco comunica tier; identidad J1/J2, ganador y "(tú)" los cargan nombres, corona y glow del card (ya no hay colores fijos morado/azul en los avatares).
 
 **Diseño cerrado:**
 - 5 tiers: Bronze (1), Silver (2), Gold (3), Diamond (4), Legendary (5).
@@ -92,6 +100,9 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 8. Sonido "cha-ching" al ganar apuesta (mini-capa cosmética).
 9. Rediseño visual con Stitch — pantalla por pantalla, empezando por vista de espectador, definir lenguaje visual primero, **después** de validar con usuarios reales.
 10. **LARGO PLAZO, requiere abogado primero:** suscripción premium con cash-out (puntos → dinero). Riesgo regulatorio serio (SEGOB / Ley de Juegos y Sorteos, fiscal, políticas de payout de MercadoPago; puntos se vuelven pasivo). **No construir sin abogado.**
+
+### Deuda técnica
+- **Regenerar `types/database.ts` contra la DB viva (v15–v19).** Está desactualizado desde v15 (no tiene referral ni la mayoría de columnas nuevas; por eso abunda `(supabase as any)`). En v19 solo se parcharon a mano `frame_tier`/`frame_unlocked_via` en el Row de profiles.
 
 ### Descartado
 - Fixed-odds (plataforma cubre pérdidas).
