@@ -32,29 +32,42 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 
 ---
 
-## Estado actual (actualizar cuando cierre una capa)
-
 ### En curso
-**Marcos evolutivos de jugador — M1** (no iniciado, decisiones pendientes).
+**Marcos evolutivos de jugador — M1** (listo para arrancar, todas las decisiones cerradas).
 
-Decisiones ya tomadas:
-- Progresión combinada XP + compra.
-- Marcos se muestran en todos lados (match, spectate, perfil, dashboard, ranking).
-- Moderación reactiva de fotos para beta.
-- Bucket de Storage para avatares con límite de tamaño + jpg/png.
+**Diseño cerrado:**
+- 5 tiers: Bronze (1), Silver (2), Gold (3), Diamond (4), Legendary (5).
+- Progresión mixta: victorias + compra con puntos.
+- Umbrales por victorias: 0 / 5 / 20 / 50 / 150.
+- Precios de compra (arranque, ajustables): Silver 1,500 pts, Gold 5,000 pts, Diamond 15,000 pts.
+- Bronze y Legendary NO son comprables (Bronze es default, Legendary solo por victorias).
+- Columna `frame_unlocked_via` guarda 'wins' o 'purchase'; visualmente el marco es el mismo.
+- Progresión solo sube, nunca baja.
+- Moderación reactiva de fotos para beta (aplica a M2).
+- Bucket de Storage para avatares con límite de tamaño + jpg/png (aplica a M2).
+- Marcos se muestran en: MatchRoom, SpectateRoom, Dashboard, perfil, ranking.
 
-**Pendiente antes de arrancar M1:**
-- Número de tiers: 3 (bronze/silver/gold), 4 (+diamond) o 5 (+legendary).
-- Umbrales de desbloqueo (por victorias: 0/5/20/50, o por matches jugados).
+**Tareas técnicas M1:**
+1. Migración `v19_player_frames.sql`:
+   - Tabla catálogo `frame_tiers` (tier, name, wins_required, purchase_price).
+   - Columnas en `profiles`: `frame_tier int default 1`, `frame_unlocked_via text default 'wins'`.
+   - Función `recalculate_frame_tier(user_id)`: cuenta victorias, sube tier si aplica, solo sube.
+   - Trigger en `matches` (after update, cuando pasa a completed con winner): llama `recalculate_frame_tier(winner_id)`.
+   - Función `buy_frame_tier(target_tier)`: valida saldo, valida precio no NULL, descuenta pts, actualiza tier y marca `unlocked_via='purchase'`. SECURITY DEFINER, search_path hardened.
+2. Componente `PlayerFrame.tsx` con prop `tier`, renderiza wrapper con clase `player-frame-tier-{1..5}`.
+3. CSS de 5 estilos distinguibles (versión funcional, no final — Stitch lo rediseña después).
+4. Integrar en MatchRoom, SpectateRoom, Dashboard, perfil, ranking.
 
-Nota técnica: la clase `player-frame` ya está reservada en `SpectateRoom.tsx`.
-
-M2 (subida de foto) viene después de M1.
+**Notas:**
+- Clase `player-frame` ya está reservada en `SpectateRoom.tsx`.
+- Precios pueden ajustarse con UPDATE simple después de ver comportamiento real.
+- M2 (subida de foto con Storage bucket) viene después de M1.
 
 ### Completado y validado en producción
 - **Pari-mutuel (v10–v13, Capas 1–3C):** tabla `match_bets`, funciones `place_bet` / `resolve_bets` / `refund_bets`, ventana de 90s vía `betting_closes_at`, rake 5%, payout proporcional, reembolso completo si no hay ganador o se cancela. Modelo de fixed-odds descartado explícitamente.
 - **Capa 3A/3B/3C:** panel de apuestas en SpectateRoom (pot, odds, countdown, quick-bet), función `get_my_bets()`, componente `MisApuestas.tsx`. Fix: apuestas `refunded` ahora muestran `cancelada`.
 - **Live betting por rondas (v13, Capa 2, cerrada 3-jul):** tabla `bet_rounds`, función `open_bet_round`, `resolve_bets_internal` multi-pool, banner "¡NUEVA RONDA DE APUESTAS!" con Web Audio API + flash naranja + animaciones. Guard `players_cannot_bet`. Fix de doble conteo de apuesta propia en pot (early return en INSERT de realtime si `bet.user_id === userId`).
+
 - **"Mis apuestas" tab global.**
 - **Moderador Capa 4.1 (v14, cerrada 4-jul):** tabla `match_moderators`, funciones `propose_moderator` / `accept_moderator`, card en MatchRoom con realtime, badge en SpectateRoom, guard `mods_cannot_bet`.
 - **Referral R1 (v15, cerrada 5-jul):** `referral_code`, `referred_by`, `referral_qualified` en profiles; `make_partner(email)` (solo desde SQL Editor); `attribute_referral(code)` con guard de <48h; `get_my_referral_stats()`; `ReferralTracker.tsx` global + `PartnerPanel.tsx` en Dashboard. Código de partner de Victor: `xhif444`. Validado end-to-end.
