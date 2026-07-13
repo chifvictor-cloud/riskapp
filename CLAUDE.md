@@ -33,10 +33,7 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 ---
 
 ### En curso
-**Nada activo.** M1 (marcos evolutivos) cerrado el 12-jul — ver "Completado". Siguiente capa: decidir del backlog con Victor.
-
-**Pendiente menor de M1 (no bloquea):**
-- Integrar `PlayerFrame` en perfil público y ranking (mismo patrón: PlayerFrame envolviendo avatar, diff de una pantalla a la vez).
+**Nada activo.** M1 (marcos evolutivos) COMPLETADO el 13-jul, sin pendientes — ver "Completado". Siguiente capa: decidir del backlog con Victor.
 
 **Ideas apuntadas (post-M1, ya se pueden discutir):**
 - Marcos épicos animados (fuego, electricidad, sombras) para tiers altos — genera FOMO, el flex ajeno vende. No es CSS simple: requiere Lottie/SVG animado/canvas, con cuidado de performance en celular. Va con el rediseño Stitch (#9). El CSS actual es placeholder funcional a propósito.
@@ -54,7 +51,7 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 - **Referral R1 (v15, cerrada 5-jul):** `referral_code`, `referred_by`, `referral_qualified` en profiles; `make_partner(email)` (solo desde SQL Editor); `attribute_referral(code)` con guard de <48h; `get_my_referral_stats()`; `ReferralTracker.tsx` global + `PartnerPanel.tsx` en Dashboard. Código de partner de Victor: `xhif444`. Validado end-to-end.
 - **Fix crítico de registro:** trigger `handle_new_user` reescrito con `lower() + regexp_replace('[^a-z0-9_]', '', 'g')` + loop de unicidad. Nuevos registros arrancan en 0 pts / 0 balance (sin welcome bonus, decisión de Victor). Confirmación de email sigue activa (anti-bot).
 - **Auditoría de seguridad Fases 1–2 (v16–v18, cerrada 5-jul):** 6 vulnerabilidades reales parchadas (profiles auto-update de balance/is_admin; INSERT directo en `match_bets` saltándose `place_bet`; `resolve_bets_internal` ejecutable públicamente; `report_match_result` muerto pero callable; `add_points` público; `make_partner` público). `search_path` endurecido en 8 funciones SECURITY DEFINER. Migración v17 (918 líneas, idempotente) versiona todo el SQL previo en repo. `reportMatchResult` server action eliminado; todo el flujo de resultado ahora va por `submit_match_result` con doble confirmación.
-- **Marcos evolutivos M1 (v19, cerrada 12-jul):** catálogo `frame_tiers` (5 tiers Bronze→Legendary; umbrales 0/5/20/50/150 victorias; precios 1,500/5,000/15,000 pts, ajustables con UPDATE; Bronze y Legendary NO comprables); columnas `frame_tier`/`frame_unlocked_via` en profiles; `recalculate_frame_tier` + trigger `matches_frame_tier_on_completed` (sube tier al ganar, solo sube); `buy_frame_tier(p_target_tier)` SECURITY DEFINER que devuelve jsonb con `error`/`success` (NO lanza excepción, a diferencia de `redeem_product`). Componente `PlayerFrame.tsx` (clase `player-frame-tier-{1..5}`, CSS placeholder). Integrado en SpectateRoom, MatchRoom y Dashboard. Tienda de marcos en `/store`: `FrameShop.tsx` + server action `buyFrameTier` en `store/actions.ts`, con confirmación previa mostrando balance resultante. Compra validada en producción. La DB permite saltar tiers (Bronze→Gold directo pagando solo Gold). Pendiente menor: PlayerFrame en perfil público y ranking.
+- **Marcos evolutivos M1 (v19, cerrada 13-jul):** catálogo `frame_tiers` (5 tiers Bronze→Legendary; umbrales 0/5/20/50/150 victorias; precios 1,500/5,000/15,000 pts, ajustables con UPDATE; Bronze y Legendary NO comprables); columnas `frame_tier`/`frame_unlocked_via` en profiles; `recalculate_frame_tier` + trigger `matches_frame_tier_on_completed` (sube tier al ganar, solo sube); `buy_frame_tier(p_target_tier)` SECURITY DEFINER que devuelve jsonb con `error`/`success` (NO lanza excepción, a diferencia de `redeem_product`). Componente `PlayerFrame.tsx` (clase `player-frame-tier-{1..5}`, CSS placeholder). Integrado en SpectateRoom, MatchRoom, Dashboard, perfil (hero) y ranking — en ranking solo en filas de rank 4+; el podio y el top-3 de las filas conservan el color de medalla SIN marco a propósito (ahí el color comunica rank, no tier). Tienda de marcos en `/store`: `FrameShop.tsx` + server action `buyFrameTier` en `store/actions.ts`, con confirmación previa mostrando balance resultante. Compra validada en producción. La DB permite saltar tiers (Bronze→Gold directo pagando solo Gold). Formato de puntos unificado en toda `/store` vía `formatPts` en `lib/format.ts` (locale `es-MX` fijo; sin él, locale `es` pinta 4 dígitos sin separador y 5 con punto). De pilón: fix del podio del ranking, colores y alturas se indexaban por posición visual en vez de rank (el #1 salía plateado y con columna baja).
 
 ### Pendiente de validar
 - Flujo completo de betting + rondas con amigos reales (`gabscmplus`, `schavez090805`, `andresemiliano70`) observando comprensión de UI sin explicación.
@@ -68,7 +65,7 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 3. Parlays (combinadas multi-match, verificación ya resuelta).
 4. Rol de streamer/mod + eventos verificados por stream en vivo — **desbloqueador** de #5.
 5. Mercados SÍ/NO de jugadas específicas (primer kill, primer shotgun, etc.) — **bloqueado** hasta #4.
-6. ~~Marcos evolutivos M1~~ ✅ (cerrada 12-jul). M2 (foto) después.
+6. ~~Marcos evolutivos M1~~ ✅ (cerrada 13-jul). M2 (foto) después.
 7. Loot boxes (después de M1+M2).
 8. Sonido "cha-ching" al ganar apuesta (mini-capa cosmética).
 9. Rediseño visual con Stitch — pantalla por pantalla, empezando por vista de espectador, definir lenguaje visual primero, **después** de validar con usuarios reales.
