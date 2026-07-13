@@ -51,8 +51,9 @@ export default async function RankingPage() {
           <div className="grid grid-cols-3 gap-4 mb-8">
             {[players[1], players[0], players[2]].map((player, idx) => {
               const actualRank = idx === 1 ? 1 : idx === 0 ? 2 : 3
-              const colors = ['#9ca3af', '#facc15', '#d97706']
-              const heights = ['h-28', 'h-36', 'h-24']
+              // Orden por rank: [#1 oro, #2 plata, #3 bronce] — se indexa con actualRank - 1
+              const colors = ['#facc15', '#9ca3af', '#d97706']
+              const heights = ['h-36', 'h-28', 'h-24']
               const color = colors[actualRank - 1]
               const totalMatches = player.wins + player.losses
               const winRate = totalMatches > 0 ? Math.round((player.wins / totalMatches) * 100) : 0

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { redeemProduct } from './actions'
+import { formatPts } from '@/lib/format'
 import { Crown, Star, Zap, ShoppingBag, Package, CheckCircle, Clock, AlertCircle } from 'lucide-react'
 
 interface Product {
@@ -109,7 +110,7 @@ export default function StoreClient({ userPoints, isVip, products, initialRedemp
           <div>
             <p className="text-[#888] text-sm mb-1">Tus puntos disponibles</p>
             <div className="flex items-end gap-2">
-              <span className="text-5xl font-black text-white">{points.toLocaleString()}</span>
+              <span className="text-5xl font-black text-white">{formatPts(points)}</span>
               <span className="text-[#8b5cf6] text-lg font-bold mb-1">pts</span>
             </div>
             {isVip && (
@@ -182,7 +183,7 @@ export default function StoreClient({ userPoints, isVip, products, initialRedemp
                 <Zap size={16} style={{ color: pkg.color }} />
               </div>
               <div className="flex items-end gap-1 mb-0.5">
-                <span className="text-white font-black text-2xl">{pkg.pts.toLocaleString()}</span>
+                <span className="text-white font-black text-2xl">{formatPts(pkg.pts)}</span>
                 <span className="text-[#888] text-sm mb-0.5">pts</span>
               </div>
               <p className="text-[#888] text-xs mb-4">${pkg.price} MXN</p>
@@ -259,7 +260,7 @@ export default function StoreClient({ userPoints, isVip, products, initialRedemp
                   <div className="flex items-center justify-between mb-3 mt-2">
                     <div className="flex items-center gap-1">
                       <Star size={12} className="text-[#8b5cf6]" />
-                      <span className="text-[#8b5cf6] font-black text-sm">{product.points_cost.toLocaleString()} pts</span>
+                      <span className="text-[#8b5cf6] font-black text-sm">{formatPts(product.points_cost)} pts</span>
                     </div>
                     {product.stock !== null && (
                       <span className={`text-[10px] font-semibold ${outOfStock ? 'text-red-400' : 'text-[#555]'}`}>
@@ -302,7 +303,7 @@ export default function StoreClient({ userPoints, isVip, products, initialRedemp
                           Procesando...
                         </span>
                       ) : !canAfford ? (
-                        `Faltan ${(product.points_cost - points).toLocaleString()} pts`
+                        `Faltan ${formatPts(product.points_cost - points)} pts`
                       ) : outOfStock ? (
                         'Sin stock'
                       ) : (
@@ -335,7 +336,7 @@ export default function StoreClient({ userPoints, isVip, products, initialRedemp
                   </p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="text-[#8b5cf6] font-bold text-sm">-{r.points_spent.toLocaleString()} pts</p>
+                  <p className="text-[#8b5cf6] font-bold text-sm">-{formatPts(r.points_spent)} pts</p>
                   <span className={`text-[10px] font-semibold ${
                     r.status === 'fulfilled' ? 'text-green-400' :
                     r.status === 'cancelled' ? 'text-red-400' :

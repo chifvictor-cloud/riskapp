@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import PlayerFrame from '@/components/PlayerFrame'
 import { buyFrameTier } from './actions'
+import { formatPts } from '@/lib/format'
 import { Trophy, Star, CheckCircle, AlertCircle, Clock } from 'lucide-react'
 
 interface FrameTierRow {
@@ -17,10 +18,6 @@ interface Props {
   initialPoints: number
   tiers: FrameTierRow[]
 }
-
-// Locale fijo: sin él, runtimes en locale 'es' pintan 4 dígitos sin separador
-// (3750) y 5 con punto (13.750) en la misma pantalla.
-const formatPts = (n: number) => n.toLocaleString('es-MX')
 
 export default function FrameShop({ initialUserTier, initialPoints, tiers }: Props) {
   const [userTier, setUserTier] = useState(initialUserTier)
