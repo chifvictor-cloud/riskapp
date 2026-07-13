@@ -46,7 +46,7 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 - **Capa 3A/3B/3C:** panel de apuestas en SpectateRoom (pot, odds, countdown, quick-bet), función `get_my_bets()`, componente `MisApuestas.tsx`. Fix: apuestas `refunded` ahora muestran `cancelada`.
 - **Live betting por rondas (v13, Capa 2, cerrada 3-jul):** tabla `bet_rounds`, función `open_bet_round`, `resolve_bets_internal` multi-pool, banner "¡NUEVA RONDA DE APUESTAS!" con Web Audio API + flash naranja + animaciones. Guard `players_cannot_bet`. Fix de doble conteo de apuesta propia en pot (early return en INSERT de realtime si `bet.user_id === userId`).
 
-- **"Mis apuestas" tab global.**
+- **"Mis apuestas" tab global:** ruta `/mis-apuestas` (server component con login requerido) + link en Navbar (desktop y móvil) + componente autocontenido `MisApuestas.tsx` (llama `get_my_bets()` él solo, sin props) reusado como sección colapsable en SpectateRoom. Ojo: muestra TODAS las apuestas del usuario en ambos montajes, no filtra por match.
 - **Moderador Capa 4.1 (v14, cerrada 4-jul):** tabla `match_moderators`, funciones `propose_moderator` / `accept_moderator`, card en MatchRoom con realtime, badge en SpectateRoom, guard `mods_cannot_bet`.
 - **Referral R1 (v15, cerrada 5-jul):** `referral_code`, `referred_by`, `referral_qualified` en profiles; `make_partner(email)` (solo desde SQL Editor); `attribute_referral(code)` con guard de <48h; `get_my_referral_stats()`; `ReferralTracker.tsx` global + `PartnerPanel.tsx` en Dashboard. Código de partner de Victor: `xhif444`. Validado end-to-end.
 - **Fix crítico de registro:** trigger `handle_new_user` reescrito con `lower() + regexp_replace('[^a-z0-9_]', '', 'g')` + loop de unicidad. Nuevos registros arrancan en 0 pts / 0 balance (sin welcome bonus, decisión de Victor). Confirmación de email sigue activa (anti-bot).
@@ -60,7 +60,6 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 
 ## Backlog (en orden, una a la vez)
 
-1. ~~"Mis apuestas" global~~ ✅
 2. Sponsor (#3)
 3. Parlays (combinadas multi-match, verificación ya resuelta).
 4. Rol de streamer/mod + eventos verificados por stream en vivo — **desbloqueador** de #5.
@@ -105,6 +104,12 @@ Victor quiere animaciones visuales espectaculares en momentos clave — efectos 
 
 - **Bets huérfanas** si se borra un match sin CASCADE en el FK de `match_bets`. Antes de cualquier feature de borrar match: agregar CASCADE o llamar `refund_bets` primero.
 - **Countdown ~96s** por skew de reloj cliente/servidor. El servidor valida el close time real; es solo visual.
+
+---
+
+## Pendiente técnico
+
+- **Apuestas "abiertas" zombis:** hay apuestas en estado `abierta` desde el 3-jul-2026 de matches que nunca se resolvieron (4 en la cuenta de prueba, detectadas 13-jul). Revisar si es solo data de pruebas o si falta un camino de resolución/limpieza para matches abandonados (ni completed ni cancelled → nunca corre `resolve_bets` ni `refund_bets`). Relacionado con el diseño de Capa 4 (auto-refund en disputa larga), pero eso solo cubre disputas, no abandono.
 
 ---
 
