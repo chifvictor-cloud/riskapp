@@ -33,44 +33,16 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 ---
 
 ### En curso
-**Marcos evolutivos de jugador — M1** (avanzado; sesión 8-jul).
+**Nada activo.** M1 (marcos evolutivos) cerrado el 12-jul — ver "Completado". Siguiente capa: decidir del backlog con Victor.
 
-**Estado al 8-jul:**
-- ✅ Migración v19 (`supabase/migration_v19.sql`) aplicada en producción y verificada por Victor (catálogo 5 tiers, backfill OK — todos en Bronze).
-- ✅ `PlayerFrame.tsx` + CSS de 5 tiers en `globals.css` (fuera de @layer a propósito para pisar utilities de Tailwind).
-- ✅ Integrado, aprobado y pusheado: SpectateRoom (`26fbda2`), MatchRoom (`f5b50e2`), Dashboard (`7fd5b3c`).
-- ⬜ Falta integrar: **perfil** y **ranking** (siguiente sesión, una a la vez).
-- ⬜ **UI de compra de tier no existe** — `buy_frame_tier` está viva en la DB pero ningún frontend la llama. Decidir dónde va (¿tienda? ¿perfil?) al integrar perfil.
-- Criterio visual acordado: el marco comunica tier; identidad J1/J2, ganador y "(tú)" los cargan nombres, corona y glow del card (ya no hay colores fijos morado/azul en los avatares).
+**Pendiente menor de M1 (no bloquea):**
+- Integrar `PlayerFrame` en perfil público y ranking (mismo patrón: PlayerFrame envolviendo avatar, diff de una pantalla a la vez).
 
-**Diseño cerrado:**
-- 5 tiers: Bronze (1), Silver (2), Gold (3), Diamond (4), Legendary (5).
-- Progresión mixta: victorias + compra con puntos.
-- Umbrales por victorias: 0 / 5 / 20 / 50 / 150.
-- Precios de compra (arranque, ajustables): Silver 1,500 pts, Gold 5,000 pts, Diamond 15,000 pts.
-- Bronze y Legendary NO son comprables (Bronze es default, Legendary solo por victorias).
-- Columna `frame_unlocked_via` guarda 'wins' o 'purchase'; visualmente el marco es el mismo.
-- Progresión solo sube, nunca baja.
-- Moderación reactiva de fotos para beta (aplica a M2).
-- Bucket de Storage para avatares con límite de tamaño + jpg/png (aplica a M2).
-- Marcos se muestran en: MatchRoom, SpectateRoom, Dashboard, perfil, ranking.
-
-**Tareas técnicas M1:**
-1. Migración `v19_player_frames.sql`:
-   - Tabla catálogo `frame_tiers` (tier, name, wins_required, purchase_price).
-   - Columnas en `profiles`: `frame_tier int default 1`, `frame_unlocked_via text default 'wins'`.
-   - Función `recalculate_frame_tier(user_id)`: cuenta victorias, sube tier si aplica, solo sube.
-   - Trigger en `matches` (after update, cuando pasa a completed con winner): llama `recalculate_frame_tier(winner_id)`.
-   - Función `buy_frame_tier(target_tier)`: valida saldo, valida precio no NULL, descuenta pts, actualiza tier y marca `unlocked_via='purchase'`. SECURITY DEFINER, search_path hardened.
-2. Componente `PlayerFrame.tsx` con prop `tier`, renderiza wrapper con clase `player-frame-tier-{1..5}`.
-3. CSS de 5 estilos distinguibles (versión funcional, no final — Stitch lo rediseña después).
-4. Integrar en MatchRoom, SpectateRoom, Dashboard, perfil, ranking.
-
-**Notas:**
-- Clase `player-frame` ya está reservada en `SpectateRoom.tsx`.
-- Precios pueden ajustarse con UPDATE simple después de ver comportamiento real.
-- M2 (subida de foto con Storage bucket) viene después de M1.
-- Marcos épicos animados (fuego, electricidad, sombras del inframundo, etc.) para tiers altos — genera FOMO, el flex ajeno vende. Va DESPUÉS de M1 funcional, junto con el rediseño Stitch (#9). No es CSS simple: requiere Lottie/SVG animado/canvas, con cuidado de performance en celular. La versión CSS actual es placeholder funcional a propósito.
+**Ideas apuntadas (post-M1, ya se pueden discutir):**
+- Marcos épicos animados (fuego, electricidad, sombras) para tiers altos — genera FOMO, el flex ajeno vende. No es CSS simple: requiere Lottie/SVG animado/canvas, con cuidado de performance en celular. Va con el rediseño Stitch (#9). El CSS actual es placeholder funcional a propósito.
+- Tier 0 novato (Bronze pasa a ser 1ra meta) — evaluar.
+- Regenerar `types/database.ts` contra DB viva (v15–v19) — deuda técnica, sin prisa; por eso abunda `(supabase as any)`.
+- M2 (foto de perfil): decisiones ya tomadas — moderación reactiva para beta, bucket de Storage con límite de tamaño + jpg/png.
 
 ### Completado y validado en producción
 - **Pari-mutuel (v10–v13, Capas 1–3C):** tabla `match_bets`, funciones `place_bet` / `resolve_bets` / `refund_bets`, ventana de 90s vía `betting_closes_at`, rake 5%, payout proporcional, reembolso completo si no hay ganador o se cancela. Modelo de fixed-odds descartado explícitamente.
@@ -82,6 +54,7 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 - **Referral R1 (v15, cerrada 5-jul):** `referral_code`, `referred_by`, `referral_qualified` en profiles; `make_partner(email)` (solo desde SQL Editor); `attribute_referral(code)` con guard de <48h; `get_my_referral_stats()`; `ReferralTracker.tsx` global + `PartnerPanel.tsx` en Dashboard. Código de partner de Victor: `xhif444`. Validado end-to-end.
 - **Fix crítico de registro:** trigger `handle_new_user` reescrito con `lower() + regexp_replace('[^a-z0-9_]', '', 'g')` + loop de unicidad. Nuevos registros arrancan en 0 pts / 0 balance (sin welcome bonus, decisión de Victor). Confirmación de email sigue activa (anti-bot).
 - **Auditoría de seguridad Fases 1–2 (v16–v18, cerrada 5-jul):** 6 vulnerabilidades reales parchadas (profiles auto-update de balance/is_admin; INSERT directo en `match_bets` saltándose `place_bet`; `resolve_bets_internal` ejecutable públicamente; `report_match_result` muerto pero callable; `add_points` público; `make_partner` público). `search_path` endurecido en 8 funciones SECURITY DEFINER. Migración v17 (918 líneas, idempotente) versiona todo el SQL previo en repo. `reportMatchResult` server action eliminado; todo el flujo de resultado ahora va por `submit_match_result` con doble confirmación.
+- **Marcos evolutivos M1 (v19, cerrada 12-jul):** catálogo `frame_tiers` (5 tiers Bronze→Legendary; umbrales 0/5/20/50/150 victorias; precios 1,500/5,000/15,000 pts, ajustables con UPDATE; Bronze y Legendary NO comprables); columnas `frame_tier`/`frame_unlocked_via` en profiles; `recalculate_frame_tier` + trigger `matches_frame_tier_on_completed` (sube tier al ganar, solo sube); `buy_frame_tier(p_target_tier)` SECURITY DEFINER que devuelve jsonb con `error`/`success` (NO lanza excepción, a diferencia de `redeem_product`). Componente `PlayerFrame.tsx` (clase `player-frame-tier-{1..5}`, CSS placeholder). Integrado en SpectateRoom, MatchRoom y Dashboard. Tienda de marcos en `/store`: `FrameShop.tsx` + server action `buyFrameTier` en `store/actions.ts`, con confirmación previa mostrando balance resultante. Compra validada en producción. La DB permite saltar tiers (Bronze→Gold directo pagando solo Gold). Pendiente menor: PlayerFrame en perfil público y ranking.
 
 ### Pendiente de validar
 - Flujo completo de betting + rondas con amigos reales (`gabscmplus`, `schavez090805`, `andresemiliano70`) observando comprensión de UI sin explicación.
@@ -95,14 +68,11 @@ Plataforma de torneos 1v1 de Fortnite con dinero real y apuestas de espectadores
 3. Parlays (combinadas multi-match, verificación ya resuelta).
 4. Rol de streamer/mod + eventos verificados por stream en vivo — **desbloqueador** de #5.
 5. Mercados SÍ/NO de jugadas específicas (primer kill, primer shotgun, etc.) — **bloqueado** hasta #4.
-6. **Marcos evolutivos M1** (en curso, ver arriba). M2 (foto) después.
+6. ~~Marcos evolutivos M1~~ ✅ (cerrada 12-jul). M2 (foto) después.
 7. Loot boxes (después de M1+M2).
 8. Sonido "cha-ching" al ganar apuesta (mini-capa cosmética).
 9. Rediseño visual con Stitch — pantalla por pantalla, empezando por vista de espectador, definir lenguaje visual primero, **después** de validar con usuarios reales.
 10. **LARGO PLAZO, requiere abogado primero:** suscripción premium con cash-out (puntos → dinero). Riesgo regulatorio serio (SEGOB / Ley de Juegos y Sorteos, fiscal, políticas de payout de MercadoPago; puntos se vuelven pasivo). **No construir sin abogado.**
-
-### Deuda técnica
-- **Regenerar `types/database.ts` contra la DB viva (v15–v19).** Está desactualizado desde v15 (no tiene referral ni la mayoría de columnas nuevas; por eso abunda `(supabase as any)`). En v19 solo se parcharon a mano `frame_tier`/`frame_unlocked_via` en el Row de profiles.
 
 ### Descartado
 - Fixed-odds (plataforma cubre pérdidas).
