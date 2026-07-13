@@ -1,6 +1,7 @@
 ﻿import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Navbar from '@/components/Navbar'
+import PlayerFrame from '@/components/PlayerFrame'
 import Link from 'next/link'
 import {
   Wallet, Trophy, Target, Star, Swords, TrendingUp,
@@ -87,9 +88,12 @@ export default async function ProfilePage() {
           <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5">
             {/* Avatar */}
             <div className="relative flex-shrink-0">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#8b5cf6] flex items-center justify-center shadow-[0_0_40px_rgba(139,92,246,0.3)]">
+              <PlayerFrame
+                tier={profile.frame_tier ?? 1}
+                className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center"
+              >
                 <span className="text-white font-black text-4xl sm:text-5xl">{initial}</span>
-              </div>
+              </PlayerFrame>
               {profile.is_admin && (
                 <div className="absolute -top-1.5 -right-1.5 bg-[#8b5cf6] rounded-full px-1.5 py-0.5 text-white text-[9px] font-black tracking-wider">
                   ADMIN

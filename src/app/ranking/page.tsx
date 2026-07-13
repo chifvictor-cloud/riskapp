@@ -1,5 +1,6 @@
 import Navbar from '@/components/Navbar'
 import { createClient } from '@/lib/supabase/server'
+import PlayerFrame from '@/components/PlayerFrame'
 import { Trophy, Crown, Star, Target } from 'lucide-react'
 
 export const revalidate = 60
@@ -10,7 +11,7 @@ export default async function RankingPage() {
 
   const { data: playersRaw } = await supabase
     .from('profiles')
-    .select('id, username, display_name, wins, losses, points, total_earnings, is_vip')
+    .select('id, username, display_name, wins, losses, points, total_earnings, is_vip, frame_tier')
     .order('wins', { ascending: false })
     .limit(50)
 
@@ -23,6 +24,7 @@ export default async function RankingPage() {
     points: number
     total_earnings: number
     is_vip: boolean
+    frame_tier: number
   }[]
 
   const myRank = user ? players.findIndex(p => p.id === user.id) + 1 : 0
@@ -143,7 +145,7 @@ export default async function RankingPage() {
               const winRate = totalMatches > 0 ? Math.round((player.wins / totalMatches) * 100) : 0
               const isMe = player.id === user?.id
               const medalEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : null
-              const avatarBg = rank === 1 ? 'bg-yellow-500' : rank === 2 ? 'bg-gray-400' : rank === 3 ? 'bg-amber-600' : 'bg-[#2d2960]'
+              const avatarBg = rank === 1 ? 'bg-yellow-500' : rank === 2 ? 'bg-gray-400' : 'bg-amber-600'
 
               return (
                 <div
@@ -169,9 +171,18 @@ export default async function RankingPage() {
 
                   {/* Player */}
                   <div className="col-span-5 flex items-center gap-2.5 min-w-0">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0 ${avatarBg}`}>
-                      {(player.display_name || player.username)[0]?.toUpperCase()}
-                    </div>
+                    {rank <= 3 ? (
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0 ${avatarBg}`}>
+                        {(player.display_name || player.username)[0]?.toUpperCase()}
+                      </div>
+                    ) : (
+                      <PlayerFrame
+                        tier={player.frame_tier ?? 1}
+                        className="w-8 h-8 flex items-center justify-center text-white font-black text-sm flex-shrink-0"
+                      >
+                        {(player.display_name || player.username)[0]?.toUpperCase()}
+                      </PlayerFrame>
+                    )}
                     <div className="min-w-0">
                       <p className={`text-sm font-bold truncate ${isMe ? 'text-[#8b5cf6]' : 'text-white'}`}>
                         {player.display_name || player.username}

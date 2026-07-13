@@ -18,6 +18,10 @@ interface Props {
   tiers: FrameTierRow[]
 }
 
+// Locale fijo: sin él, runtimes en locale 'es' pintan 4 dígitos sin separador
+// (3750) y 5 con punto (13.750) en la misma pantalla.
+const formatPts = (n: number) => n.toLocaleString('es-MX')
+
 export default function FrameShop({ initialUserTier, initialPoints, tiers }: Props) {
   const [userTier, setUserTier] = useState(initialUserTier)
   const [points, setPoints] = useState(initialPoints)
@@ -57,7 +61,7 @@ export default function FrameShop({ initialUserTier, initialPoints, tiers }: Pro
         </h2>
         <div className="flex items-center gap-1.5 bg-[#0f0e2a] border border-[#1e1b4b] rounded-full px-3 py-1.5">
           <Star size={12} className="text-[#8b5cf6]" />
-          <span className="text-white font-black text-sm">{points.toLocaleString()}</span>
+          <span className="text-white font-black text-sm">{formatPts(points)}</span>
           <span className="text-[#888] text-xs">pts</span>
         </div>
       </div>
@@ -115,9 +119,9 @@ export default function FrameShop({ initialUserTier, initialPoints, tiers }: Pro
                 ) : isConfirming ? (
                   <div>
                     <p className="text-[11px] text-[#888] mb-2">
-                      Pagas <span className="text-white font-bold">{t.purchase_price!.toLocaleString()} pts</span>
+                      Pagas <span className="text-white font-bold">{formatPts(t.purchase_price!)} pts</span>
                       <br />
-                      Te quedan <span className="text-white font-bold">{(points - t.purchase_price!).toLocaleString()} pts</span>
+                      Te quedan <span className="text-white font-bold">{formatPts(points - t.purchase_price!)} pts</span>
                     </p>
                     <div className="flex gap-1.5">
                       <button
@@ -140,14 +144,14 @@ export default function FrameShop({ initialUserTier, initialPoints, tiers }: Pro
                     disabled={pendingTier !== null}
                     className="w-full bg-[#8b5cf6] hover:bg-[#7c3aed] text-white py-2 rounded-lg text-xs font-bold transition-all shadow-[0_0_16px_rgba(139,92,246,0.2)] disabled:opacity-50"
                   >
-                    Comprar · {t.purchase_price!.toLocaleString()} pts
+                    Comprar · {formatPts(t.purchase_price!)} pts
                   </button>
                 ) : (
                   <button
                     disabled
                     className="w-full bg-[#08071a] border border-[#272454] text-[#444] py-2 rounded-lg text-xs font-bold cursor-not-allowed"
                   >
-                    Te faltan {((t.purchase_price as number) - points).toLocaleString()} pts
+                    Te faltan {formatPts((t.purchase_price as number) - points)} pts
                   </button>
                 )}
               </div>
