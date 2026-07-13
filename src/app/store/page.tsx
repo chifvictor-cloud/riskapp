@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Navbar from '@/components/Navbar'
 import StoreClient from './StoreClient'
+import FrameShop from './FrameShop'
 import { ShoppingBag } from 'lucide-react'
 import type { Database } from '@/types/database'
 
@@ -17,6 +18,7 @@ export default async function StorePage() {
     { data: profileRaw },
     { data: productsRaw },
     { data: redemptionsRaw },
+    { data: frameTiersRaw },
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single() as unknown as Promise<{ data: Profile | null }>,
     (supabase as any)
@@ -30,6 +32,10 @@ export default async function StorePage() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(5),
+    (supabase as any)
+      .from('frame_tiers')
+      .select('*')
+      .order('tier'),
   ])
 
   const profile = profileRaw as Profile | null
@@ -37,6 +43,7 @@ export default async function StorePage() {
 
   const products = (productsRaw ?? []) as any[]
   const redemptions = (redemptionsRaw ?? []) as any[]
+  const frameTiers = (frameTiersRaw ?? []) as any[]
 
   return (
     <div className="min-h-screen bg-[#08071a]">
@@ -58,6 +65,14 @@ export default async function StorePage() {
           products={products}
           initialRedemptions={redemptions}
         />
+
+        <div className="mt-12">
+          <FrameShop
+            initialUserTier={profile.frame_tier}
+            initialPoints={profile.points}
+            tiers={frameTiers}
+          />
+        </div>
       </main>
     </div>
   )
